@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+/* ============================================================
+   THEME — Tailwind v4 CSS custom properties
+============================================================ */
+@theme {
+  --color-accent:    #00ff88;
+  --color-accent2:   #c084fc;
+  --color-accent3:   #38bdf8;
+  --color-surface:   #111111;
+  --color-surface-2: #171717;
+  --font-grotesk: 'Space Grotesk', sans-serif;
+  --font-sans:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+/* ============================================================
+   BASE — wrap reset inside @layer base so Tailwind utilities
+   can override these rules (unlayered CSS beats @layer utils)
+============================================================ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+    overflow-x: hidden;
+  }
+
+  body {
+    background: #080808;
+    color: #f5f5f5;
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 3px; }
+  ::-webkit-scrollbar-track { background: #080808; }
+  ::-webkit-scrollbar-thumb { background: #00ff88; border-radius: 3px; }
+
+  /* Selection */
+  ::selection { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+}
+
+/* ============================================================
+   CSS VARIABLES
+============================================================ */
+:root {
+  --accent:  #00ff88;
+  --accent2: #c084fc;
+  --bg:      #080808;
+}
+
+/* ============================================================
+   GRAIN OVERLAY
+============================================================ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   ANIMATIONS
+============================================================ */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.marquee-left  { animation: marquee-left  30s linear infinite; }
+.marquee-right { animation: marquee-right 25s linear infinite; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.cursor-blink { animation: blink 1s step-end infinite; }
+
+@keyframes float-anim {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+.float-1 { animation: float-anim 3.0s ease-in-out infinite 0.0s; }
+.float-2 { animation: float-anim 3.5s ease-in-out infinite 0.5s; }
+.float-3 { animation: float-anim 4.0s ease-in-out infinite 1.0s; }
+.float-4 { animation: float-anim 3.2s ease-in-out infinite 1.5s; }
+
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0;   }
+}
+
+@keyframes spin-slow {
+  from { transform: scale(1.1) rotate(0deg); }
+  to   { transform: scale(1.1) rotate(360deg); }
+}
