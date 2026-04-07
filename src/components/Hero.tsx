@@ -54,7 +54,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center"
+      className="relative min-h-[100svh] flex items-center"
       style={{
         background:
           'radial-gradient(ellipse 80% 60% at 10% 50%, rgba(0,255,136,0.04) 0%, transparent 60%), #080808',
@@ -72,7 +72,7 @@ export default function Hero() {
       {/* 3D Cyber Particle Network */}
       <CyberBackground />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 w-full pt-24 pb-16">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 w-full pt-32 pb-24 md:pt-24 md:pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center">
 
           {/* LEFT — Content */}

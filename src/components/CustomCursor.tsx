@@ -7,12 +7,14 @@ export default function CustomCursor() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
     
     // Check if we are on a device with touch/no-hover
     if (window.matchMedia("(pointer: coarse)").matches) {
+      setIsTouchDevice(true);
       return;
     }
 
@@ -44,7 +46,7 @@ export default function CustomCursor() {
     };
   }, []);
 
-  if (!isMounted) return null;
+  if (!isMounted || isTouchDevice) return null;
 
   return (
     <>

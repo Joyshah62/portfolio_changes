@@ -204,8 +204,8 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
-                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '2.5rem' }}
-                className={`${
+                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}
+                className={`text-3xl sm:text-4xl ${
                   activeSection === link.href.replace('#', '')
                     ? 'text-[#00ff88]'
                     : 'text-[#555] hover:text-[#f5f5f5]'
