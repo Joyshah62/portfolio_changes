@@ -15,52 +15,52 @@ interface TimelineEntry {
 const entries: TimelineEntry[] = [
   {
     number: '01',
-    period: '2021 — 2025',
-    org: 'Charotar University of Science & Technology',
-    role: 'B.Tech Computer Science and Engineering',
+    period: 'Dec 2021 — Jun 2025',
+    org: 'Charusat University',
+    role: 'B.Tech. Computer Science & Engineering',
     description:
-      'Completed undergraduate studies in Computer Science, building foundations in algorithms, systems programming, and distributed computing. Graduated with honors, sparking a passion for AI and security.',
-    tags: ['Java', 'C', 'Algorithms', 'OS', 'Networks'],
+      'Graduated with a 9.15/10 CGPA. Built strong foundations in systems programming, data structures, and computer architecture before pivoting deeply into AI and cybersecurity.',
+    tags: ['C++', 'Java', 'Algorithms', 'OS'],
     side: 'right',
   },
   {
     number: '02',
-    period: '2024',
+    period: 'May 2024 — Jun 2024',
     org: 'CyberNGO',
-    role: 'Cybersecurity Intern',
+    role: 'Cybersecurity Research Intern',
     description:
-      'Completed undergraduate studies in Computer Science, building foundations in algorithms, systems programming, and distributed computing. Graduated with honors, sparking a passion for AI and security.',
-    tags: ['Java', 'C', 'Algorithms', 'OS', 'Networks'],
+      'Developed a full-stack fraud detection platform. Architected scalable Python backends with MySQL and a React frontend, integrating an NLP classifier that achieved 90% accuracy.',
+    tags: ['Python', 'MySQL', 'React', 'NLP'],
     side: 'left',
   },
   {
     number: '03',
-    period: '2024 - 2025',
+    period: 'Dec 2024 — Apr 2025',
     org: 'Forenzy Networks',
     role: 'AI/ML Intern',
     description:
-      'Completed undergraduate studies in Computer Science, building foundations in algorithms, systems programming, and distributed computing. Graduated with honors, sparking a passion for AI and security.',
-    tags: ['Java', 'C', 'Algorithms', 'OS', 'Networks'],
+      'Engineered a real-time security log pipeline on Apache ModSecurity processing 10K+ req/min. Designed Flask APIs with ELK dashboards and implemented a BERT-based anomaly detection engine.',
+    tags: ['BERT', 'ModSecurity', 'Docker', 'ELK Stack'],
     side: 'right',
   },
   {
     number: '04',
-    period: '2025 — Present',
+    period: 'Aug 2025 — May 2027',
     org: 'Rutgers University - New Brunswick',
-    role: 'MS Computer Science',
+    role: 'M.S. in Computer Science',
     description:
-      'Pursuing Master\'s with focus on AI/ML and systems. Achieving a 3.66 GPA while taking graduate courses in machine learning, distributed systems, and advanced databases.',
-    tags: ['ML', 'Distributed Systems', 'NLP', 'Research'],
+      'Currently undertaking rigorous graduate coursework focusing heavily on Machine Learning, Deep Learning, and Distributed Systems while maintaining a 3.66 GPA.',
+    tags: ['AI', 'Data Structures', 'NLP', 'Database Systems', 'Theory of Computation'],
     side: 'left',
   },
   {
     number: '05',
-    period: '2024 — Present',
-    org: 'Rutgers CS Dept.',
-    role: 'Lecturer — CS336 Databases',
+    period: 'Feb 2026 — Present',
+    org: 'Rutgers University',
+    role: 'Part Time Lecturer',
     description:
-      'Teaching database systems to 100+ undergraduate students. Designed curriculum covering SQL, indexing, transactions, and distributed data. Consistently top-rated instructor.',
-    tags: ['PostgreSQL', 'Curriculum Design', 'Teaching', 'SQL'],
+      'Delivering lectures and developing interactive course materials for 100+ undergraduate students on PostgreSQL indexing, ACID transactions, and modern architectures like DynamoDB and Neo4j.',
+    tags: ['PostgreSQL', 'DynamoDB', 'Neo4j', 'Teaching'],
     side: 'right',
   },
 ];
@@ -125,17 +125,15 @@ export default function Journey() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: '-80px' }}
                 transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                className={`relative flex items-center group cursor-default ${
-                  entry.side === 'left'
+                className={`relative flex items-center group cursor-default ${entry.side === 'left'
                     ? 'md:flex-row-reverse'
                     : 'md:flex-row'
-                } flex-col md:flex-row gap-4 md:gap-0`}
+                  } flex-col md:flex-row gap-4 md:gap-0`}
               >
                 {/* Card */}
                 <div
-                  className={`w-full md:w-[45%] ${
-                    entry.side === 'left' ? 'md:ml-auto md:pr-10' : 'md:mr-auto md:pl-10'
-                  }`}
+                  className={`w-full md:w-[45%] ${entry.side === 'left' ? 'md:ml-auto md:pr-10' : 'md:mr-auto md:pl-10'
+                    }`}
                 >
                   <div
                     style={{

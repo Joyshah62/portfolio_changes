@@ -145,7 +145,6 @@ export default function Hero() {
               </motion.span>
             </motion.div>
 
-            {/* Description */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -154,8 +153,8 @@ export default function Hero() {
               className="text-[#999] max-w-lg"
             >
               MS CS candidate at Rutgers. I build AI systems that actually work —
-              from LLM pipelines to distributed databases. By night, I compete in
-              CTFs. By day, I teach 100+ students the art of database systems.
+              from RAG pipelines and LLM agents to scalable full-stack applications.
+              Seeking Summer 2026 SWE/ML internships.
             </motion.p>
 
             {/* CTAs */}

@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 
-const stats = [
+const stats: Array<{ value?: number; textValue?: string; suffix: string; label: string; isFloat?: boolean }> = [
+  { textValue: 'IEEE', suffix: '', label: 'Published Researcher' },
+  { value: 2, suffix: '', label: 'Industrial Internships' },
+  { value: 3.66, suffix: '', label: 'Master\'s GPA', isFloat: true },
   { value: 26, suffix: '+', label: 'Projects Built' },
-  { value: 3.66, suffix: '', label: 'GPA · Rutgers MS', isFloat: true },
-  { value: 100, suffix: '+', label: 'Students Taught' },
-  { value: 5, suffix: '+', label: 'CTF Competitions' },
 ];
 
 function CountUp({ value, suffix, isFloat }: { value: number; suffix: string; isFloat?: boolean }) {
@@ -160,6 +160,7 @@ function LiveClock() {
   );
 }
 
+
 export default function About() {
   return (
     <section id="about" className="py-32 px-4 sm:px-8 relative z-10">
@@ -184,13 +185,13 @@ export default function About() {
         {/* BENTO BOX GRID */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-auto">
           
-          {/* Tile 1: Main Introduction (Spans 8 cols) */}
+          {/* Tile 1: Main Introduction (Spans 7 cols on desktop) */}
           <motion.div
              initial={{ opacity: 0, y: 20 }}
              whileInView={{ opacity: 1, y: 0 }}
              viewport={{ once: true, margin: '-50px' }}
              transition={{ duration: 0.5, delay: 0.05 }}
-             className="md:col-span-8 p-8 md:p-10 rounded-[32px] border border-white/5 bg-[#0a0a0a]/90 backdrop-blur-xl relative overflow-hidden group hover:border-white/10 transition-colors duration-500"
+             className="md:col-span-12 lg:col-span-7 p-8 md:p-10 rounded-[32px] border border-white/5 bg-[#0a0a0a]/90 backdrop-blur-xl relative overflow-hidden group hover:border-white/10 transition-colors duration-500"
           >
              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ff88]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
              <h2
@@ -205,8 +206,8 @@ export default function About() {
              >
                I architect high-performance{' '}
                <span className="text-[#00ff88]">AI systems</span>,
-               uncover vulnerabilities through{' '}
-               <span className="text-[#c084fc]">security research</span>,
+               build end-to-end{' '}
+               <span className="text-[#c084fc]">software products</span>,
                and engineer scalable{' '}
                <span className="text-[#38bdf8]">infrastructure</span>.
              </h2>
@@ -214,17 +215,73 @@ export default function About() {
                style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.05rem', lineHeight: 1.8 }}
                className="text-[#888] mt-6 max-w-2xl"
              >
-               As a Master&apos;s candidate at Rutgers University and CS336 Lecturer, I operate at the intersection of applied AI and distributed systems. From architecting LLM-powered autonomous agents to designing real-time database telemetry pipelines, my focus is always on performance and scale. My technical domain spans the entire stack: fine-tuning transformer models, reverse-engineering binaries for CTF competitions, and deploying resilient cloud architecture.
+               As a Master&apos;s candidate at Rutgers University, I operate at the intersection of applied AI and full-stack engineering. From building RAG-powered LLM agents to designing production microservices and database systems, my focus is always on performance and scale. My technical domain spans the entire stack: training transformer models, engineering robust backend APIs, and deploying containerized applications on the cloud.
              </p>
           </motion.div>
 
-          {/* Tile 2: Location / Map Point (Spans 4 cols) */}
+          {/* Tile 2: Stats Grid (Spans 5 cols on desktop) */}
+          <div className="md:col-span-12 lg:col-span-5 grid grid-cols-2 gap-4">
+             {stats.map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: 0.25 + i * 0.05 }}
+                  className="p-6 min-h-[140px] rounded-[32px] border border-white/5 bg-[#0a0a0a]/50 backdrop-blur-sm flex flex-col justify-center items-center text-center hover:bg-[#111] hover:border-white/10 transition-colors group relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-b from-[#00ff88]/0 to-[#00ff88]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* Subtle Giant Background Number/Text */}
+                  <div 
+                    className="absolute -right-2 -top-4 text-[4rem] font-bold text-white/[0.02] pointer-events-none select-none transition-transform duration-500 group-hover:scale-110 group-hover:text-white/[0.04] whitespace-nowrap"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {stat.textValue || stat.value}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 800,
+                      fontSize: '2.5rem',
+                      letterSpacing: '-0.04em',
+                    }}
+                    className="text-[#00ff88] leading-none mb-3 relative z-10 drop-shadow-[0_0_10px_rgba(0,255,136,0.3)]"
+                  >
+                    {stat.textValue ? (
+                      stat.textValue
+                    ) : (
+                      <CountUp value={stat.value || 0} suffix={stat.suffix} isFloat={stat.isFloat} />
+                    )}
+                  </div>
+                  <div
+                    style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}
+                    className="text-[#777] uppercase tracking-wider font-semibold relative z-10"
+                  >
+                    {stat.label}
+                  </div>
+                </motion.div>
+             ))}
+          </div>
+
+          {/* Tile 3: Terminal (Spans 7 cols on desktop) */}
+          <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             whileInView={{ opacity: 1, y: 0 }}
+             viewport={{ once: true, margin: '-50px' }}
+             transition={{ duration: 0.5, delay: 0.35 }}
+             className="md:col-span-12 lg:col-span-7 h-full min-h-[300px]"
+          >
+             <TerminalBlock />
+          </motion.div>
+
+          {/* Tile 4: Location Widget (Spans 5 cols on desktop) */}
           <motion.div
              initial={{ opacity: 0, scale: 0.95 }}
              whileInView={{ opacity: 1, scale: 1 }}
              viewport={{ once: true, margin: '-50px' }}
-             transition={{ duration: 0.5, delay: 0.15 }}
-             className="md:col-span-4 p-8 rounded-[32px] border border-white/5 bg-[#0a0a0a] relative overflow-hidden flex flex-col justify-between group hover:border-[#00ff88]/30 transition-colors duration-500 min-h-[300px]"
+             transition={{ duration: 0.5, delay: 0.4 }}
+             className="md:col-span-12 lg:col-span-5 p-8 rounded-[32px] border border-white/5 bg-[#0a0a0a] relative overflow-hidden flex flex-col justify-between group hover:border-[#00ff88]/30 transition-colors duration-500 min-h-[300px]"
           >
              {/* Grid & Glow Backdrop */}
              <div className="absolute inset-0 pointer-events-none"
@@ -267,58 +324,6 @@ export default function About() {
                  </div>
                </div>
              </div>
-          </motion.div>
-
-          {/* Tile 3: Stats Grid (Spans 5 cols) */}
-          <div className="md:col-span-5 grid grid-cols-2 gap-4">
-             {stats.map((stat, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.5, delay: 0.25 + i * 0.05 }}
-                  className="p-6 min-h-[140px] rounded-[32px] border border-white/5 bg-[#0a0a0a]/50 backdrop-blur-sm flex flex-col justify-center items-center text-center hover:bg-[#111] hover:border-white/10 transition-colors group relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#00ff88]/0 to-[#00ff88]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Subtle Giant Background Number */}
-                  <div 
-                    className="absolute -right-2 -top-4 text-[5rem] font-bold text-white/[0.02] pointer-events-none select-none transition-transform duration-500 group-hover:scale-110 group-hover:text-white/[0.04]"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {stat.value}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      fontWeight: 800,
-                      fontSize: '2.5rem',
-                      letterSpacing: '-0.04em',
-                    }}
-                    className="text-[#00ff88] leading-none mb-3 relative z-10 drop-shadow-[0_0_10px_rgba(0,255,136,0.3)]"
-                  >
-                    <CountUp value={stat.value} suffix={stat.suffix} isFloat={stat.isFloat} />
-                  </div>
-                  <div
-                    style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}
-                    className="text-[#777] uppercase tracking-wider font-semibold relative z-10"
-                  >
-                    {stat.label}
-                  </div>
-                </motion.div>
-             ))}
-          </div>
-
-          {/* Tile 4: Terminal (Spans 7 cols) */}
-          <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             whileInView={{ opacity: 1, y: 0 }}
-             viewport={{ once: true, margin: '-50px' }}
-             transition={{ duration: 0.5, delay: 0.35 }}
-             className="md:col-span-7 h-full"
-          >
-             <TerminalBlock />
           </motion.div>
 
         </div>

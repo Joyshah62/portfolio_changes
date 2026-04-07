@@ -14,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-[#080808] text-[#f5f5f5]">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col bg-[#080808] text-[#f5f5f5]" suppressHydrationWarning>
         {children}
         <CustomCursor />
       </body>

@@ -22,63 +22,62 @@ const projects: Project[] = [
   {
     id: 'snapinterview',
     title: 'SnapInterview',
-    subtitle: 'AI-Powered Interview Coach',
+    subtitle: 'LLM-Powered Mock Interview Platform',
     description:
-      'Real-time AI interview coaching platform using LLaMA 3 + RAG. Transcribes speech with Whisper, evaluates responses, and delivers instant feedback. Deployed with FastAPI + WebSockets for sub-second latency.',
-    tags: ['LLaMA 3', 'RAG', 'Whisper', 'FastAPI', 'WebSockets', 'React'],
+      'Engineered a RAG pipeline with semantic chunking to generate context-aware interview questions via LLaMA-3.2-3B. Designed an AI agent orchestrating Whisper transcription, retrieval-augmented generation, and a weighted rubric evaluation engine.',
+    tags: ['LLaMA 3', 'RAG', 'Whisper', 'React', 'AWS S3', 'Python'],
     github: 'https://github.com/joyshah62/',
-    image: '/snapinterview-demo.png',
     featured: true,
     span: 'lg:col-span-2',
   },
   {
-    id: 'ml-explain',
-    title: 'ML Explainability Suite',
-    subtitle: 'Model Interpretability',
+    id: 'bvs-platform',
+    title: 'BVS Ayurvedic Platform',
+    subtitle: 'Ecommerce & Management Full-Stack',
     description:
-      'SHAP + LIME-based dashboard for explaining black-box model decisions. Interactive visualizations for feature importance.',
-    tags: ['SHAP', 'LIME', 'PyTorch', 'Streamlit'],
+      'Developed a production e-commerce platform managing 200+ SKUs with real-time inventory tracking. Architected a Flask and ReactJS system with role-based access control, Razorpay, and Dockerized AWS deployment.',
+    tags: ['ReactJS', 'Flask', 'MongoDB', 'AWS S3', 'Docker', 'Razorpay'],
     github: 'https://github.com/joyshah62',
     span: 'lg:col-span-1',
   },
   {
-    id: 'ctf',
-    title: 'CTF Writeups',
-    subtitle: 'Security Research',
+    id: 'fraud-detection',
+    title: 'Fraud Detection Engine',
+    subtitle: 'Real-Time NLP Classifier',
     description:
-      'Documented solutions for pwn, crypto, and web challenges. Ghidra, pwntools, and custom scripts.',
-    tags: ['pwn', 'crypto', 'Ghidra', 'pwntools'],
-    github: 'https://github.com/joyxshah',
+      'Built a full-stack fraud detection platform integrating an NLP classifier achieving 90% accuracy. Architected scalable Python backend services with MySQL and a responsive React frontend with JWT authentication.',
+    tags: ['Python', 'NLP', 'MySQL', 'React', 'JWT'],
+    github: 'https://github.com/joyshah62',
     span: 'lg:col-span-1',
   },
   {
-    id: 'distributed-db',
-    title: 'Distributed DB Monitor',
-    subtitle: 'Real-Time Telemetry',
+    id: 'threat-pipeline',
+    title: 'Threat Intel Pipeline',
+    subtitle: 'Live Attack Analytics',
     description:
-      'Monitors distributed PostgreSQL clusters. Tracks latency, replication lag, and query performance in real time.',
-    tags: ['PostgreSQL', 'Go', 'Prometheus', 'Grafana'],
-    github: 'https://github.com/joyxshah',
+      'Engineered a real-time security log pipeline on Apache ModSecurity processing 10K+ req/min. Implemented a BERT-based HTTP anomaly detection engine achieving 95% accuracy using honeypot data.',
+    tags: ['Python', 'BERT', 'ModSecurity', 'ELK Stack', 'Docker'],
+    github: 'https://github.com/joyshah62/Web-Application-Firewall',
     span: 'lg:col-span-1',
   },
   {
-    id: 'meeting-intel',
-    title: 'Meeting Intelligence',
-    subtitle: 'NLP Pipeline',
+    id: 'dist-db',
+    title: 'Database Architecture Systems',
+    subtitle: 'Advanced Database Operations',
     description:
-      'Transformer-based pipeline for meeting transcription, summarization, and action-item extraction. Uses BERT fine-tuned on meeting data.',
-    tags: ['BERT', 'HuggingFace', 'FastAPI', 'React'],
-    github: 'https://github.com/joyxshah',
+      'Built robust systems demonstrating ACID transactions, concurrency control, and query optimization. Engineered integrations spanning relational PostgreSQL and NoSQL stores including DynamoDB and MongoDB.',
+    tags: ['PostgreSQL', 'DynamoDB', 'MongoDB', 'Neo4j', 'SQL'],
+    github: 'https://github.com/joyshah62',
     span: 'lg:col-span-1',
   },
   {
-    id: 'presence-ai',
-    title: 'Presence AI',
-    subtitle: 'Ambient Intelligence Platform',
+    id: 'ieee-yolo',
+    title: 'Strengthening Facial Biometrics',
+    subtitle: 'IEEE Publication • Liveness Detection for Anti-Spoofing',
     description:
-      'Context-aware ambient computing system that adapts smart-home environments using multimodal AI. Integrates computer vision, NLP, and IoT sensors to understand occupant intent and automate responses.',
-    tags: ['Computer Vision', 'MQTT', 'TensorFlow', 'Node.js', 'IoT', 'AWS Lambda'],
-    github: 'https://github.com/joyxshah',
+      'Proposed an end-to-end face recognition and liveness detection system combining Dlib and YOLOv8, trained on NUAA, MSU-MFSD, and a custom spoofing dataset, achieving 98.5% accuracy against diverse spoofing attacks.',
+    tags: ['YOLOv8', 'Computer Vision', 'PyTorch', 'Dlib', 'Biometrics'],
+    demo: 'https://ieeexplore.ieee.org/document/10899685',
     span: 'lg:col-span-3',
   },
 ];
@@ -98,20 +97,20 @@ function ProjectCard({ project, featured, fullWidth }: { project: Project; featu
     setIsHovered(true);
     const el = cardRef.current;
     if (!el) return;
-    el.style.transform   = 'translateY(-5px)';
+    el.style.transform = 'translateY(-5px)';
     el.style.borderColor = `rgba(0, 255, 136, 0.3)`;
-    el.style.boxShadow   = `0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,255,136,0.1), 0 0 40px rgba(0,255,136,0.06)`;
-    el.style.background  = `rgba(0, 255, 136, 0.02)`;
+    el.style.boxShadow = `0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,255,136,0.1), 0 0 40px rgba(0,255,136,0.06)`;
+    el.style.background = `rgba(0, 255, 136, 0.02)`;
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
     const el = cardRef.current;
     if (!el) return;
-    el.style.transform   = 'translateY(0)';
+    el.style.transform = 'translateY(0)';
     el.style.borderColor = 'rgba(255,255,255,0.06)';
-    el.style.boxShadow   = 'none';
-    el.style.background  = 'rgba(12, 12, 12, 0.6)';
+    el.style.boxShadow = 'none';
+    el.style.background = 'rgba(12, 12, 12, 0.6)';
   };
 
   const isFull = fullWidth ?? false;
@@ -128,14 +127,14 @@ function ProjectCard({ project, featured, fullWidth }: { project: Project; featu
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        background:   'rgba(12, 12, 12, 0.6)',
+        background: 'rgba(12, 12, 12, 0.6)',
         backdropFilter: 'blur(20px)',
-        border:       '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.06)',
         borderRadius: '24px',
-        overflow:     'hidden',
-        position:     'relative',
-        transition:   'transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease',
-        willChange:   'transform',
+        overflow: 'hidden',
+        position: 'relative',
+        transition: 'transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease',
+        willChange: 'transform',
       }}
       className="group cursor-pointer h-full border border-white/5"
     >
@@ -154,7 +153,7 @@ function ProjectCard({ project, featured, fullWidth }: { project: Project; featu
           boxShadow: `inset 0 0 60px rgba(0,255,136,0.03)`,
         }}
       />
-      
+
       {/* Dynamic Mouse Spotlight */}
       <div
         className="pointer-events-none absolute inset-0 transition-opacity duration-300 rounded-[24px]"
@@ -166,15 +165,15 @@ function ProjectCard({ project, featured, fullWidth }: { project: Project; featu
 
       <div className={`p-6 relative z-10 ${isFull ? 'md:flex md:items-center md:gap-12' : ''} ${isFeatured ? 'p-8' : ''}`}>
         {project.image && (
-          <div 
+          <div
             className={`rounded-xl overflow-hidden relative transition-colors duration-500 border border-white/[0.03] bg-black ${isFull ? 'md:w-1/2 mb-8 md:mb-0' : 'mb-6'} shrink-0 group-hover:border-[#00ff88]/20`}
           >
-             <img 
-               src={project.image} 
-               alt={project.title} 
-               className="w-full h-[140px] md:h-[180px] object-cover object-[center_top] group-hover:scale-[1.03] transition-transform duration-700 opacity-80 group-hover:opacity-100" 
-             />
-             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none" />
+            <img
+              src={project.image}
+              alt={project.title}
+              className="w-full h-[140px] md:h-[180px] object-cover object-[center_top] group-hover:scale-[1.03] transition-transform duration-700 opacity-80 group-hover:opacity-100"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none" />
           </div>
         )}
         <div className={isFull ? 'flex-1' : ''}>
@@ -209,13 +208,13 @@ function ProjectCard({ project, featured, fullWidth }: { project: Project; featu
               <span
                 key={tag}
                 style={{
-                  fontFamily:   "'JetBrains Mono', monospace",
-                  fontSize:     '0.68rem',
-                  padding:      '4px 12px',
-                  background:   'rgba(255,255,255,0.03)',
-                  border:       '1px solid rgba(255,255,255,0.08)',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '0.68rem',
+                  padding: '4px 12px',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
                   borderRadius: '100px',
-                  color:        '#a0a0a0',
+                  color: '#a0a0a0',
                 }}
                 className="group-hover:border-[#00ff88]/30 group-hover:text-[#e0e0e0] transition-colors duration-300"
               >
@@ -309,7 +308,7 @@ export default function Projects() {
           className="mt-12 text-center"
         >
           <a
-            href="https://github.com/joyxshah"
+            href="https://github.com/joyshah62"
             target="_blank"
             rel="noopener noreferrer"
             style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem' }}
