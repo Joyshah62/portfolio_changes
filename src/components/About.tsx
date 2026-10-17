@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import { motion, useInView, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
+import { contact, recognition, stats } from '@/data/site';
+import SectionHeader from './SectionHeader';
+import { useInViewport } from './three/shared';
 
-const stats: Array<{ value?: number; textValue?: string; suffix: string; label: string; isFloat?: boolean }> = [
-  { textValue: 'IEEE', suffix: '', label: 'Published Researcher' },
-  { value: 2, suffix: '', label: 'Industrial Internships' },
-  { value: 3.66, suffix: '', label: 'Master\'s GPA', isFloat: true },
-  { value: 26, suffix: '+', label: 'Projects Built' },
-];
+const PortraitScene = dynamic(() => import('./three/PortraitScene'), { ssr: false });
 
 function CountUp({ value, suffix, isFloat }: { value: number; suffix: string; isFloat?: boolean }) {
   const [count, setCount] = useState(0);
@@ -17,121 +18,23 @@ function CountUp({ value, suffix, isFloat }: { value: number; suffix: string; is
 
   useEffect(() => {
     if (!inView) return;
-    const duration = 1500;
-    const steps = 50;
-    const increment = value / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        current = value;
-        clearInterval(timer);
-      }
-      setCount(current);
-    }, duration / steps);
-    return () => clearInterval(timer);
+    let raf = 0;
+    const start = performance.now();
+    const duration = 1600;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      setCount(value * (1 - Math.pow(1 - p, 4)));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [inView, value]);
 
   return (
     <span ref={ref}>
-      {isFloat ? count.toFixed(2) : Math.floor(count)}{suffix}
+      {isFloat ? count.toFixed(2) : Math.round(count)}
+      {suffix}
     </span>
-  );
-}
-
-const terminalContent = [
-  { type: 'cmd', text: 'whoami' },
-  { type: 'out', text: 'Joy Shah', color: '#00ff88' },
-  { type: 'cmd', text: 'cat info.txt' },
-  { type: 'out', text: 'MS CS @ Rutgers (GPA: 3.66)', color: '#f5f5f5' },
-  { type: 'out', text: 'AI/ML Engineer + CTF Competitor', color: '#f5f5f5' },
-  { type: 'out', text: 'CS336 Lecturer — 100+ students', color: '#f5f5f5' },
-  { type: 'out', text: 'Based in New Brunswick, NJ', color: '#f5f5f5' },
-  { type: 'cmd', text: 'ls skills/' },
-  { type: 'out', text: 'ai-ml/  cybersec/  fullstack/  teaching/', color: '#c084fc' },
-  { type: 'cmd', text: 'cat currently.txt' },
-  { type: 'out', text: 'Open to Summer 2026 internships ✓', color: '#00ff88' },
-];
-
-function TerminalBlock() {
-  const [visibleLines, setVisibleLines] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-100px' });
-
-  useEffect(() => {
-    if (!inView) return;
-    let i = 0;
-    const timer = setInterval(() => {
-      i++;
-      setVisibleLines(i);
-      if (i >= terminalContent.length) clearInterval(timer);
-    }, 200);
-    return () => clearInterval(timer);
-  }, [inView]);
-
-  return (
-    <div
-      ref={ref}
-      style={{
-        background: '#0a0a0a',
-        border: '1px solid rgba(255,255,255,0.05)',
-        borderRadius: '32px',
-        overflow: 'hidden',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Window bar */}
-      <div
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-        className="flex items-center gap-1.5 px-4 py-3"
-      >
-        <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-        <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-        <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-        <span
-          style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem' }}
-          className="ml-3 text-[#333]"
-        >
-          terminal — joy@rutgers
-        </span>
-      </div>
-
-      <div className="p-6 md:p-8 space-y-1.5 flex-1 bg-black/20">
-        {terminalContent.slice(0, visibleLines).map((line, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-            className="flex gap-2"
-            style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem', lineHeight: 1.6 }}
-          >
-            {line.type === 'cmd' ? (
-              <>
-                <span className="text-[#00ff88]">$</span>
-                <span className="text-[#f5f5f5]">{line.text}</span>
-              </>
-            ) : (
-              <>
-                <span className="text-[#333]">›</span>
-                <span style={{ color: line.color }}>{line.text}</span>
-              </>
-            )}
-          </motion.div>
-        ))}
-        {visibleLines >= terminalContent.length && (
-          <div
-            className="flex gap-2"
-            style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem' }}
-          >
-            <span className="text-[#00ff88]">$</span>
-            <span className="cursor-blink text-[#00ff88]">▋</span>
-          </div>
-        )}
-      </div>
-    </div>
   );
 }
 
@@ -139,194 +42,255 @@ function LiveClock() {
   const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
-    setTime(new Date());
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    const tick = () => setTime(new Date());
+    const first = requestAnimationFrame(tick);
+    const id = setInterval(tick, 1000);
+    return () => {
+      cancelAnimationFrame(first);
+      clearInterval(id);
+    };
   }, []);
 
-  if (!time) return <div className="h-[2.5rem] mb-1" />;
+  const label = time
+    ? time.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true })
+    : 'Loading';
 
-  const timeString = time.toLocaleTimeString('en-US', {
-    timeZone: 'America/New_York',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
+  return <span className="tabular-nums">{label}</span>;
+}
 
+/* ---------------------------------------------------------------
+   Scroll-lit statement: each word brightens as it passes through
+   the reading line, the way Apple's product pages read.
+---------------------------------------------------------------- */
+const statement: Array<{ text: string; tone?: 'signal' | 'cobalt' | 'italic' }> = [
+  { text: 'A' }, { text: 'student' }, { text: 'stuck' }, { text: 'on' }, { text: 'code.' },
+  { text: 'An' }, { text: 'analyst' }, { text: 'buried' }, { text: 'in' }, { text: 'alerts.' },
+  { text: 'Those' }, { text: 'are' }, { text: 'the' }, { text: 'problems', tone: 'signal' },
+  { text: 'behind' }, { text: 'my' }, { text: 'work.' }, { text: 'I' }, { text: 'use' },
+  { text: 'machine', tone: 'cobalt' }, { text: 'learning', tone: 'cobalt' }, { text: 'and' },
+  { text: 'software', tone: 'italic' }, { text: 'engineering', tone: 'italic' },
+  { text: 'to' }, { text: 'help' }, { text: 'people' }, { text: 'move' }, { text: 'forward.' },
+];
+
+const toneClass = { signal: 'italic text-signal', cobalt: 'italic text-cobalt', italic: 'italic' } as const;
+
+function Word({ progress, range, text, tone }: { progress: MotionValue<number>; range: [number, number]; text: string; tone?: keyof typeof toneClass }) {
+  const opacity = useTransform(progress, range, [0.14, 1]);
   return (
-    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '2.5rem', letterSpacing: '-0.02em', lineHeight: 1 }} className="text-[#f5f5f5] mb-2">
-      {timeString}
+    <motion.span style={{ opacity }} className={tone ? toneClass[tone] : undefined}>
+      {text}{' '}
+    </motion.span>
+  );
+}
+
+function ScrollStatement() {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const { scrollYProgress: raw } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.5'] });
+  const scrollYProgress = useSpring(raw, { stiffness: 170, damping: 30, restDelta: 0.0005 });
+  const n = statement.length;
+  return (
+    <p
+      ref={ref}
+      aria-label={statement.map((w) => w.text).join(' ')}
+      className="max-w-6xl font-serif text-[clamp(2rem,4.6vw,4.4rem)] leading-[1.08] tracking-[-0.02em] text-ink"
+    >
+      <span aria-hidden>
+        {statement.map((w, i) => (
+          <Word key={i} progress={scrollYProgress} range={[i / n, (i + 1) / n]} text={w.text} tone={w.tone} />
+        ))}
+      </span>
+    </p>
+  );
+}
+
+const spec = [
+  { k: 'name', v: 'Joy Shah' },
+  { k: 'current role', v: 'Software Engineer Intern, CodeBench' },
+  { k: 'education', v: 'M.S. Computer Science, Rutgers' },
+  { k: 'focus', v: 'Applied AI, backend and web development' },
+  { k: 'location', v: 'New Brunswick, NJ' },
+  { k: 'graduating', v: 'May 2027' },
+];
+
+function Stamp() {
+  return (
+    <div className="relative h-32 w-32 shrink-0">
+      <svg viewBox="0 0 100 100" className="spin-slow absolute inset-0 h-full w-full text-ink">
+        <defs>
+          <path id="stamp-circle" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" />
+        </defs>
+        <text className="font-mono" fontSize="8.4" letterSpacing="2.6" fill="currentColor">
+          <textPath href="#stamp-circle">OPEN TO RELOCATION · OPEN TO RELOCATION ·</textPath>
+        </text>
+      </svg>
+      <div className="absolute inset-[30%] grid place-items-center rounded-full bg-signal">
+        <span className="font-serif text-2xl italic leading-none text-on-signal">✺</span>
+      </div>
     </div>
   );
 }
 
+class PortraitBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
+function Portrait() {
+  const ref = useRef<HTMLDivElement>(null);
+  const visible = useInViewport(ref, '0px');
+  const reduced = useReducedMotion() ?? false;
+  const [mode, setMode] = useState<'photo' | 'particles'>('photo');
+  const [ready, setReady] = useState(false);
+  const onReady = useCallback(() => setReady(true), []);
+  return (
+    <div ref={ref} className="portrait-frame">
+      <Image src="/profile.jpeg" alt="Joy Shah" fill sizes="(max-width: 767px) 100vw, 560px" className="portrait-image" />
+      {mode === 'particles' && (
+        <PortraitBoundary>
+          <div className="portrait-canvas" data-ready={ready} aria-hidden="true">
+            <PortraitScene visible={visible} reduced={reduced} onReady={onReady} />
+          </div>
+        </PortraitBoundary>
+      )}
+      <div className="portrait-caption">
+        <span>Joy Shah</span>
+        {mode === 'particles' && <span className="hidden xl:inline">Move to explore</span>}
+      </div>
+      <div className="portrait-modes" role="group" aria-label="Portrait style">
+        {(['photo', 'particles'] as const).map((value) => (
+          <button key={value} type="button" aria-pressed={mode === value} onClick={() => { if (mode !== value) { setReady(false); setMode(value); } }}>
+            {value === 'photo' ? 'Photo' : 'Particles'}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const reveal = {
+  initial: { opacity: 0, y: 24, filter: 'blur(6px)' },
+  whileInView: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  viewport: { once: true, margin: '-80px' },
+};
+const spring = (delay = 0) => ({ type: 'spring' as const, bounce: 0, duration: 0.9, delay });
 
 export default function About() {
   return (
-    <section id="about" className="py-32 px-4 sm:px-8 relative z-10">
-      <div className="max-w-6xl mx-auto">
-        
-        {/* Header */}
-        <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true, margin: '-100px' }}
-           transition={{ duration: 0.6 }}
-           className="mb-12"
-        >
-          <span
-            style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem' }}
-            className="text-[#00ff88] tracking-widest uppercase"
-          >
-            // 001 — ABOUT
-          </span>
-        </motion.div>
+    <section id="about" className="relative px-4 py-28 sm:px-8 md:py-40">
+      <div className="mx-auto max-w-[1400px]">
+        <SectionHeader index="01" label="About" title={<>The person behind <em>the code.</em></>} aside="Rutgers · NJ" />
 
-        {/* BENTO BOX GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-auto">
-          
-          {/* Tile 1: Main Introduction (Spans 7 cols on desktop) */}
-          <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             whileInView={{ opacity: 1, y: 0 }}
-             viewport={{ once: true, margin: '-50px' }}
-             transition={{ duration: 0.5, delay: 0.05 }}
-             className="md:col-span-12 lg:col-span-7 p-8 md:p-10 rounded-[32px] border border-white/5 bg-[#0a0a0a]/90 backdrop-blur-xl relative overflow-hidden group hover:border-white/10 transition-colors duration-500"
-          >
-             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#00ff88]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-             <h2
-               style={{
-                 fontFamily: "'Space Grotesk', sans-serif",
-                 fontWeight: 700,
-                 fontSize: 'clamp(1.6rem, 3vw, 2.4rem)',
-                 lineHeight: 1.3,
-                 letterSpacing: '-0.02em',
-               }}
-               className="text-[#f5f5f5]"
-             >
-               I architect high-performance{' '}
-               <span className="text-[#00ff88]">AI systems</span>,
-               build end-to-end{' '}
-               <span className="text-[#c084fc]">software products</span>,
-               and engineer scalable{' '}
-               <span className="text-[#38bdf8]">infrastructure</span>.
-             </h2>
-             <p
-               style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.05rem', lineHeight: 1.8 }}
-               className="text-[#888] mt-6 max-w-2xl"
-             >
-               As a Master&apos;s candidate at Rutgers University, I operate at the intersection of applied AI and full-stack engineering. From building RAG-powered LLM agents to designing production microservices and database systems, my focus is always on performance and scale. My technical domain spans the entire stack: training transformer models, engineering robust backend APIs, and deploying containerized applications on the cloud.
-             </p>
+        <ScrollStatement />
+
+        <div className="mt-16 grid grid-cols-1 gap-10 md:mt-24 md:grid-cols-12 md:gap-8">
+          <motion.div {...reveal} transition={spring()} className="md:col-span-5">
+            <Portrait />
           </motion.div>
 
-          {/* Tile 2: Stats Grid (Spans 5 cols on desktop) */}
-          <div className="md:col-span-12 lg:col-span-5 grid grid-cols-2 gap-4">
-             {stats.map((stat, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.5, delay: 0.25 + i * 0.05 }}
-                  className="p-6 min-h-[140px] rounded-[32px] border border-white/5 bg-[#0a0a0a]/50 backdrop-blur-sm flex flex-col justify-center items-center text-center hover:bg-[#111] hover:border-white/10 transition-colors group relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#00ff88]/0 to-[#00ff88]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Subtle Giant Background Number/Text */}
-                  <div 
-                    className="absolute -right-2 -top-4 text-[4rem] font-bold text-white/[0.02] pointer-events-none select-none transition-transform duration-500 group-hover:scale-110 group-hover:text-white/[0.04] whitespace-nowrap"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {stat.textValue || stat.value}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      fontWeight: 800,
-                      fontSize: '2.5rem',
-                      letterSpacing: '-0.04em',
-                    }}
-                    className="text-[#00ff88] leading-none mb-3 relative z-10 drop-shadow-[0_0_10px_rgba(0,255,136,0.3)]"
-                  >
-                    {stat.textValue ? (
-                      stat.textValue
-                    ) : (
-                      <CountUp value={stat.value || 0} suffix={stat.suffix} isFloat={stat.isFloat} />
-                    )}
-                  </div>
-                  <div
-                    style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}
-                    className="text-[#777] uppercase tracking-wider font-semibold relative z-10"
-                  >
-                    {stat.label}
-                  </div>
-                </motion.div>
-             ))}
+          <div className="flex flex-col gap-10 md:col-span-7">
+            <motion.div {...reveal} transition={spring(0.05)} className="space-y-5">
+              <p className="text-[1.05rem] leading-[1.8] text-ink-soft">
+                I&apos;m pursuing my Master&apos;s in Computer Science at Rutgers, graduating in May 2027.
+                As a software engineer intern at CodeBench, I develop a learning platform inside JupyterLab.
+                My work spans the React interface, Python services, and an AI tutor that helps students
+                reason through their code.
+              </p>
+              <p className="text-[1.05rem] leading-[1.8] text-ink-soft">
+                At Forenzy Networks, my work on web attack detection reduced false positives from 23% to 4%.
+                I&apos;ve also published computer vision research at IEEE CICT and won two hackathons.
+                I enjoy following a problem across disciplines, from understanding the data to designing
+                the API and getting the interface right.
+              </p>
+            </motion.div>
+
+            {/* Spec sheet */}
+            <motion.dl {...reveal} transition={spring(0.15)}>
+              {spec.map(({ k, v }) => (
+                <div key={k} className="group flex items-baseline justify-between gap-6 border-b border-line py-3.5">
+                  <dt className="eyebrow text-muted transition-colors group-hover:text-signal">{k}</dt>
+                  <dd className="text-right text-[0.98rem] text-ink">{v}</dd>
+                </div>
+              ))}
+              <div className="flex items-baseline justify-between gap-6 border-b border-ink py-3.5">
+                <dt className="eyebrow text-muted">status</dt>
+                <dd className="inline-flex items-center gap-2 text-right text-[0.98rem] font-medium text-ink">
+                  <span className="h-2 w-2 rounded-full bg-signal" />
+                  Open to software &amp; AI engineering roles
+                </dd>
+              </div>
+            </motion.dl>
           </div>
-
-          {/* Tile 3: Terminal (Spans 7 cols on desktop) */}
-          <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             whileInView={{ opacity: 1, y: 0 }}
-             viewport={{ once: true, margin: '-50px' }}
-             transition={{ duration: 0.5, delay: 0.35 }}
-             className="md:col-span-12 lg:col-span-7 h-full min-h-[300px]"
-          >
-             <TerminalBlock />
-          </motion.div>
-
-          {/* Tile 4: Location Widget (Spans 5 cols on desktop) */}
-          <motion.div
-             initial={{ opacity: 0, scale: 0.95 }}
-             whileInView={{ opacity: 1, scale: 1 }}
-             viewport={{ once: true, margin: '-50px' }}
-             transition={{ duration: 0.5, delay: 0.4 }}
-             className="md:col-span-12 lg:col-span-5 p-8 rounded-[32px] border border-white/5 bg-[#0a0a0a] relative overflow-hidden flex flex-col justify-between group hover:border-[#00ff88]/30 transition-colors duration-500 min-h-[300px]"
-          >
-             {/* Grid & Glow Backdrop */}
-             <div className="absolute inset-0 pointer-events-none"
-                  style={{
-                    backgroundImage: 'radial-gradient(circle at 100% 0%, rgba(0, 255, 136, 0.15) 0%, transparent 60%), radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)',
-                    backgroundSize: '100% 100%, 16px 16px'
-                  }}
-             />
-
-             {/* Radar Rings (Top Right) */}
-             <div className="absolute -top-16 -right-16 w-64 h-64 border border-[#00ff88]/10 rounded-full flex items-center justify-center pointer-events-none group-hover:border-[#00ff88]/20 transition-colors duration-500">
-                 <div className="w-48 h-48 border border-[#00ff88]/15 rounded-full flex items-center justify-center relative">
-                    <div className="absolute inset-0 rounded-full animate-spin" style={{ background: 'conic-gradient(from 0deg, transparent 70%, rgba(0,255,136,0.15) 100%)', animationDuration: '4s' }} />
-                    <div className="w-32 h-32 border border-[#00ff88]/15 rounded-full flex items-center justify-center relative">
-                       {/* Center Dot */}
-                       <div className="w-1.5 h-1.5 bg-[#00ff88] rounded-full shadow-[0_0_15px_#00ff88]" />
-                    </div>
-                 </div>
-             </div>
-
-             <div className="relative z-10 flex justify-end items-start w-full">
-               {/* Coordinates */}
-               <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }} className="text-[#00ff88]/60 mt-1 tracking-widest uppercase text-right leading-relaxed">
-                 40.4862° N<br/>74.4518° W
-               </div>
-             </div>
-
-             {/* Bottom Info */}
-             <div className="relative z-10 mt-auto pt-10">
-               <LiveClock />
-               <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }} className="text-[1.1rem] tracking-tight text-[#888] mb-4">
-                 New Brunswick, NJ
-               </div>
-               
-               {/* Status Pills */}
-               <div className="flex flex-wrap items-center gap-2">
-                 <div className="flex items-center gap-1.5 px-3 py-1 bg-[rgba(0,255,136,0.05)] border border-[rgba(0,255,136,0.15)] rounded-full text-[#00ff88]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse" />
-                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}>Open to Relocation</span>
-                 </div>
-               </div>
-             </div>
-          </motion.div>
-
         </div>
+
+        {/* Stats */}
+        <div className="mt-20 grid grid-cols-2 border-t border-ink md:mt-28 lg:grid-cols-4">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              {...reveal}
+              transition={spring(i * 0.07)}
+              className={`group border-line py-8 pr-4 ${i % 2 ? 'border-l pl-4 sm:pl-6' : ''} ${
+                i > 0 ? 'lg:border-l lg:pl-6' : ''
+              } ${i < 2 ? 'border-b lg:border-b-0' : ''}`}
+            >
+              <div className="display text-[clamp(3.4rem,7vw,6.5rem)] text-ink transition-colors duration-300 group-hover:text-signal">
+                {s.textValue ?? <CountUp value={s.value ?? 0} suffix={s.suffix} isFloat={s.isFloat} />}
+              </div>
+              <div className="eyebrow mt-3 text-ink-soft">{s.label}</div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Recognition */}
+        <div className="mt-20 grid grid-cols-1 gap-6 md:mt-28 md:grid-cols-12">
+          <motion.h3 {...reveal} transition={spring()} className="display text-[clamp(2.2rem,4vw,3.6rem)] md:col-span-4">
+            <em>Awards &amp; research</em>
+          </motion.h3>
+          <ul className="border-t border-ink md:col-span-8">
+            {recognition.map((r, i) => (
+              <motion.li key={r.title} {...reveal} transition={spring(i * 0.07)} className="border-b border-line">
+                <a
+                  href={r.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group grid grid-cols-[3.5rem_1fr_auto] items-baseline gap-4 py-5"
+                >
+                  <span className="eyebrow text-muted">{r.year}</span>
+                  <span>
+                    <span className="block font-serif text-[1.7rem] leading-tight tracking-tight text-ink transition-colors group-hover:text-signal">
+                      {r.title}
+                    </span>
+                    <span className="mt-1 block text-[0.95rem] text-ink-soft">{r.detail}</span>
+                  </span>
+                  <ArrowUpRight size={18} className="text-ink transition-transform duration-300 group-hover:rotate-45" />
+                </a>
+              </motion.li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Location strip */}
+        <motion.div
+          {...reveal}
+          transition={spring()}
+          className="mt-20 flex flex-col gap-8 rounded-[28px] bg-card p-6 sm:flex-row sm:items-center sm:justify-between sm:p-10"
+        >
+          <div className="flex items-center gap-6 sm:gap-8">
+            <Stamp />
+            <div>
+              <div className="eyebrow mb-2 text-muted">Local time · New Brunswick</div>
+              <div className="display text-[clamp(2.8rem,6vw,5rem)] text-ink">
+                <LiveClock />
+              </div>
+            </div>
+          </div>
+          <div className="eyebrow leading-relaxed text-ink-soft sm:text-right">
+            {contact.coords}
+            <br />
+            Eastern Time (ET)
+          </div>
+        </motion.div>
       </div>
     </section>
   );

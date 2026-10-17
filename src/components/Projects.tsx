@@ -1,323 +1,264 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ExternalLink } from 'lucide-react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
 import { GithubIcon } from './SocialIcons';
+import { contact, projects, type Project } from '@/data/site';
+import SectionHeader from './SectionHeader';
 
-interface Project {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  tags: string[];
-  github?: string;
-  demo?: string;
-  image?: string;
-  featured?: boolean;
-  span?: string;
-}
-
-const projects: Project[] = [
+// Generative cover art — one per card, all CSS
+const covers: Array<{ bg: string; fg: string; pattern: string; size?: string }> = [
   {
-    id: 'snapinterview',
-    title: 'SnapInterview',
-    subtitle: 'LLM-Powered Mock Interview Platform',
-    description:
-      'Engineered a RAG pipeline with semantic chunking to generate context-aware interview questions via LLaMA-3.2-3B. Designed an AI agent orchestrating Whisper transcription, retrieval-augmented generation, and a weighted rubric evaluation engine.',
-    tags: ['LLaMA 3', 'RAG', 'Whisper', 'React', 'AWS S3', 'Python'],
-    github: 'https://github.com/joyshah62/',
-    featured: true,
-    span: 'lg:col-span-2',
+    bg: '#ff4f1f',
+    fg: '#141210',
+    pattern: 'repeating-radial-gradient(circle at 70% 120%, transparent 0 22px, rgba(20,18,16,0.22) 22px 23px)',
   },
   {
-    id: 'bvs-platform',
-    title: 'BVS Ayurvedic Platform',
-    subtitle: 'Ecommerce & Management Full-Stack',
-    description:
-      'Developed a production e-commerce platform managing 200+ SKUs with real-time inventory tracking. Architected a Flask and ReactJS system with role-based access control, Razorpay, and Dockerized AWS deployment.',
-    tags: ['ReactJS', 'Flask', 'MongoDB', 'AWS S3', 'Docker', 'Razorpay'],
-    github: 'https://github.com/joyshah62',
-    span: 'lg:col-span-1',
+    bg: '#2b3bff',
+    fg: '#f5f1e8',
+    pattern:
+      'linear-gradient(rgba(245,241,232,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(245,241,232,0.16) 1px, transparent 1px)',
+    size: '28px 28px',
   },
   {
-    id: 'fraud-detection',
-    title: 'Fraud Detection Engine',
-    subtitle: 'Real-Time NLP Classifier',
-    description:
-      'Built a full-stack fraud detection platform integrating an NLP classifier achieving 90% accuracy. Architected scalable Python backend services with MySQL and a responsive React frontend with JWT authentication.',
-    tags: ['Python', 'NLP', 'MySQL', 'React', 'JWT'],
-    github: 'https://github.com/joyshah62',
-    span: 'lg:col-span-1',
+    bg: '#141210',
+    fg: '#f5f1e8',
+    pattern: 'repeating-linear-gradient(-45deg, transparent 0 14px, rgba(255,79,31,0.55) 14px 15px)',
   },
   {
-    id: 'threat-pipeline',
-    title: 'Threat Intel Pipeline',
-    subtitle: 'Live Attack Analytics',
-    description:
-      'Engineered a real-time security log pipeline on Apache ModSecurity processing 10K+ req/min. Implemented a BERT-based HTTP anomaly detection engine achieving 95% accuracy using honeypot data.',
-    tags: ['Python', 'BERT', 'ModSecurity', 'ELK Stack', 'Docker'],
-    github: 'https://github.com/joyshah62/Web-Application-Firewall',
-    span: 'lg:col-span-1',
+    bg: '#e4ddcf',
+    fg: '#141210',
+    pattern: 'radial-gradient(rgba(20,18,16,0.35) 1.2px, transparent 1.4px)',
+    size: '16px 16px',
   },
   {
-    id: 'dist-db',
-    title: 'Database Architecture Systems',
-    subtitle: 'Advanced Database Operations',
-    description:
-      'Built robust systems demonstrating ACID transactions, concurrency control, and query optimization. Engineered integrations spanning relational PostgreSQL and NoSQL stores including DynamoDB and MongoDB.',
-    tags: ['PostgreSQL', 'DynamoDB', 'MongoDB', 'Neo4j', 'SQL'],
-    github: 'https://github.com/joyshah62',
-    span: 'lg:col-span-1',
+    bg: '#d6246e',
+    fg: '#f5f1e8',
+    pattern: 'repeating-conic-gradient(from 0deg at 85% 15%, transparent 0 8deg, rgba(245,241,232,0.18) 8deg 9deg)',
   },
   {
-    id: 'ieee-yolo',
-    title: 'Strengthening Facial Biometrics',
-    subtitle: 'IEEE Publication • Liveness Detection for Anti-Spoofing',
-    description:
-      'Proposed an end-to-end face recognition and liveness detection system combining Dlib and YOLOv8, trained on NUAA, MSU-MFSD, and a custom spoofing dataset, achieving 98.5% accuracy against diverse spoofing attacks.',
-    tags: ['YOLOv8', 'Computer Vision', 'PyTorch', 'Dlib', 'Biometrics'],
-    demo: 'https://ieeexplore.ieee.org/document/10899685',
-    span: 'lg:col-span-3',
+    bg: '#d99a00',
+    fg: '#141210',
+    pattern: 'repeating-linear-gradient(0deg, transparent 0 18px, rgba(20,18,16,0.2) 18px 19px)',
   },
 ];
 
-function ProjectCard({ project, featured, fullWidth }: { project: Project; featured?: boolean; fullWidth?: boolean }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
+function ProjectCard({ project, index, large, wide }: { project: Project; index: number; large?: boolean; wide?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const rx = useSpring(useTransform(my, [0, 1], [6, -6]), { stiffness: 200, damping: 30 });
+  const ry = useSpring(useTransform(mx, [0, 1], [-8, 8]), { stiffness: 200, damping: 30 });
+  const glareX = useTransform(mx, [0, 1], ['0%', '100%']);
+  const glareY = useTransform(my, [0, 1], ['0%', '100%']);
+  const glare = useTransform(
+    [glareX, glareY],
+    ([x, y]) => `radial-gradient(400px circle at ${x} ${y}, rgba(255,255,255,0.28), transparent 50%)`,
+  );
+  const cover = covers[index % covers.length];
+  const primary = project.links[0];
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  const onMove = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
+    const r = ref.current!.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width);
+    my.set((e.clientY - r.top) / r.height);
   };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    const el = cardRef.current;
-    if (!el) return;
-    el.style.transform = 'translateY(-5px)';
-    el.style.borderColor = `rgba(0, 255, 136, 0.3)`;
-    el.style.boxShadow = `0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,255,136,0.1), 0 0 40px rgba(0,255,136,0.06)`;
-    el.style.background = `rgba(0, 255, 136, 0.02)`;
+  const reset = () => {
+    mx.set(0.5);
+    my.set(0.5);
   };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    const el = cardRef.current;
-    if (!el) return;
-    el.style.transform = 'translateY(0)';
-    el.style.borderColor = 'rgba(255,255,255,0.06)';
-    el.style.boxShadow = 'none';
-    el.style.background = 'rgba(12, 12, 12, 0.6)';
-  };
-
-  const isFull = fullWidth ?? false;
-  const isFeatured = featured ?? false;
 
   return (
-    <motion.div
-      ref={cardRef}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
+    <motion.article
+      initial={{ opacity: 0, y: 48, scale: 0.97, filter: 'blur(8px)' }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
       viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.6 }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        background: 'rgba(12, 12, 12, 0.6)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: '24px',
-        overflow: 'hidden',
-        position: 'relative',
-        transition: 'transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease',
-        willChange: 'transform',
-      }}
-      className="group cursor-pointer h-full border border-white/5"
+      transition={{ type: 'spring', bounce: 0, duration: 1, delay: (index % 2) * 0.08 }}
+      style={{ perspective: 1200 }}
+      className="h-full"
     >
-      {/* Subtle Glow Strip at Top */}
-      <div
-        className="absolute top-0 left-0 right-0 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{
-          background: `linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.8), transparent)`,
-        }}
-      />
-
-      {/* Hover Spotlight Base Glow */}
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-[24px]"
-        style={{
-          boxShadow: `inset 0 0 60px rgba(0,255,136,0.03)`,
-        }}
-      />
-
-      {/* Dynamic Mouse Spotlight */}
-      <div
-        className="pointer-events-none absolute inset-0 transition-opacity duration-300 rounded-[24px]"
-        style={{
-          opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.04), transparent 40%)`,
-        }}
-      />
-
-      <div className={`p-6 relative z-10 ${isFull ? 'md:flex md:items-center md:gap-12' : ''} ${isFeatured ? 'p-8' : ''}`}>
-        {project.image && (
+      <motion.div
+        ref={ref}
+        onPointerMove={onMove}
+        onPointerLeave={reset}
+        style={{ rotateX: rx, rotateY: ry, transformStyle: 'preserve-3d' }}
+        className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-line bg-card"
+      >
+        {/* Cover */}
+        <div
+          className={`relative overflow-hidden ${wide ? 'aspect-[2/1]' : large ? 'aspect-[16/9]' : 'aspect-[16/10]'}`}
+          style={{ background: cover.bg, color: cover.fg }}
+        >
           <div
-            className={`rounded-xl overflow-hidden relative transition-colors duration-500 border border-white/[0.03] bg-black ${isFull ? 'md:w-1/2 mb-8 md:mb-0' : 'mb-6'} shrink-0 group-hover:border-[#00ff88]/20`}
-          >
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-[140px] md:h-[180px] object-cover object-[center_top] group-hover:scale-[1.03] transition-transform duration-700 opacity-80 group-hover:opacity-100"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none" />
+            className="absolute inset-0 transition-transform duration-700 ease-out-expo group-hover:scale-110"
+            style={{ backgroundImage: cover.pattern, backgroundSize: cover.size }}
+          />
+          <motion.div
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            style={{ background: glare }}
+          />
+          <div className="absolute inset-0 flex flex-col justify-between p-5 sm:p-7" style={{ transform: 'translateZ(40px)' }}>
+            <div className="flex items-start justify-between">
+              <span className="eyebrow opacity-80">No. {String(index + 1).padStart(2, '0')}</span>
+              <span className="eyebrow max-w-[60%] text-right opacity-80">{project.subtitle}</span>
+            </div>
+            <div className={`display italic ${large ? 'text-[clamp(3rem,7vw,6.5rem)]' : 'text-[clamp(2.6rem,5vw,4.4rem)]'}`}>
+              {project.cover}
+            </div>
           </div>
-        )}
-        <div className={isFull ? 'flex-1' : ''}>
-          <div
-            style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}
-            className="text-[#666] uppercase tracking-widest mb-2"
-          >
-            {project.subtitle}
-          </div>
+        </div>
 
-          <h3
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 700,
-              fontSize: isFeatured ? '1.6rem' : isFull ? '1.4rem' : '1.1rem',
-              letterSpacing: '-0.02em',
-            }}
-            className="text-[#f5f5f5] mb-3"
-          >
-            {project.title}
-          </h3>
-
-          <p
-            style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.875rem', lineHeight: 1.7 }}
-            className="text-[#999] mb-5"
-          >
-            {project.description}
-          </p>
-
-          <div className="flex flex-wrap gap-2 mb-6">
-            {project.tags.map((tag) => (
-              <span
-                key={tag}
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '0.68rem',
-                  padding: '4px 12px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '100px',
-                  color: '#a0a0a0',
-                }}
-                className="group-hover:border-[#00ff88]/30 group-hover:text-[#e0e0e0] transition-colors duration-300"
+        {/* Body */}
+        <div className="flex flex-1 flex-col p-6 sm:p-8">
+          <div className="flex items-start justify-between gap-4">
+            <h3 className="font-serif text-[clamp(1.7rem,2.4vw,2.3rem)] leading-[1.05] tracking-tight text-ink">
+              {project.title}
+            </h3>
+            {primary && (
+              <a
+                href={primary.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${project.title}`}
+                className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-ink text-ink transition-all duration-500 group-hover:rotate-45 group-hover:bg-ink group-hover:text-paper"
               >
+                <ArrowUpRight size={20} />
+              </a>
+            )}
+          </div>
+          {project.award && (
+            <span className="mt-3 inline-flex w-fit items-center gap-2 rounded-full bg-ink px-3 py-1 font-mono text-[0.68rem] uppercase tracking-wider text-paper">
+              <span className="h-1.5 w-1.5 rounded-full bg-signal" />
+              {project.award}
+            </span>
+          )}
+          <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">{project.description}</p>
+          <div className="mt-auto flex flex-wrap items-center gap-2 pt-6">
+            {project.tags.map((tag) => (
+              <span key={tag} className="rounded-full bg-paper-2 px-3 py-1 font-mono text-[0.68rem] text-ink-soft">
                 {tag}
               </span>
             ))}
+            <span className="ml-auto flex items-center gap-4 pl-2">
+              {project.links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-ink underline-offset-4 hover:underline"
+                >
+                  {l.label === 'Source' && <GithubIcon size={14} />}
+                  {l.label}
+                  {l.label !== 'Source' && <ArrowUpRight size={14} />}
+                </a>
+              ))}
+            </span>
           </div>
         </div>
+      </motion.div>
+    </motion.article>
+  );
+}
 
-        <div className={`flex items-center gap-4 ${isFull ? 'md:flex-col md:gap-4' : ''}`}>
-          {project.github && (
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[#777] hover:text-[#00ff88] transition-colors"
-              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem' }}
-            >
-              <GithubIcon size={16} />
-              <span>Source</span>
-            </a>
-          )}
-          {project.demo && (
-            <a
-              href={project.demo}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[#777] hover:text-[#00ff88] transition-colors"
-              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem' }}
-            >
-              <ExternalLink size={16} />
-              <span>Live Demo</span>
-            </a>
-          )}
+const DESKTOP = '(min-width: 1024px)';
+const subscribeDesktop = (cb: () => void) => {
+  const mq = window.matchMedia(DESKTOP);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+};
+
+/** Pins the section and turns vertical scroll into a horizontal pan across the cards. */
+function Gallery() {
+  const section = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const [distance, setDistance] = useState(0);
+
+  useEffect(() => {
+    const el = track.current!;
+    const measure = () => setDistance(Math.max(0, el.scrollWidth - window.innerWidth));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  const { scrollYProgress } = useScroll({ target: section, offset: ['start start', 'end end'] });
+  const progress = useSpring(scrollYProgress, { stiffness: 170, damping: 30, restDelta: 0.0005 });
+  const x = useTransform(progress, (v) => -v * distance);
+  const counter = useTransform(progress, (v) => String(Math.min(projects.length, Math.floor(v * projects.length) + 1)).padStart(2, '0'));
+
+  return (
+    <div ref={section} className="relative" style={{ height: `calc(100svh + ${distance}px)` }}>
+      <div className="sticky top-0 flex h-[100svh] flex-col justify-center gap-8 overflow-hidden pt-16">
+        <motion.div
+          ref={track}
+          style={{ x }}
+          className="flex w-max gap-6 pl-[max(2rem,calc((100vw-1400px)/2+2rem))] pr-[max(2rem,calc((100vw-1400px)/2+2rem))]"
+        >
+          {projects.map((p, i) => (
+            <div key={p.id} className="w-[min(520px,38vw)] shrink-0">
+              <ProjectCard project={p} index={i} wide />
+            </div>
+          ))}
+        </motion.div>
+
+        <div className="mx-auto flex w-full max-w-[1400px] items-center gap-6 px-8">
+          <span className="eyebrow tabular-nums text-ink">
+            <motion.span>{counter}</motion.span>
+            <span className="text-muted"> / {String(projects.length).padStart(2, '0')}</span>
+          </span>
+          <div className="h-px flex-1 bg-line">
+            <motion.div style={{ scaleX: progress }} className="h-px origin-left bg-ink" />
+          </div>
+          <span className="eyebrow text-muted">Keep scrolling</span>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export default function Projects() {
+  const desktop = useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => false);
+
   return (
-    <section id="projects" className="py-32 px-6 sm:px-8 relative">
-      <div className="max-w-6xl mx-auto">
-        {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
-        >
-          <span
-            style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem' }}
-            className="text-[#00ff88] tracking-widest uppercase"
-          >
-            // 003 — PROJECTS
-          </span>
-          <h2
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 800,
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              letterSpacing: '-0.03em',
-            }}
-            className="text-[#f5f5f5] mt-4"
-          >
-            Things I&apos;ve Built.
-          </h2>
-        </motion.div>
+    <section id="projects" className="relative py-28 md:py-40">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-8">
+        <SectionHeader
+          index="03"
+          label="Selected work"
+          title={<>A closer look <em>at the work.</em></>}
+          aside={`${projects.length} projects`}
+        />
+      </div>
 
-        {/* Bento Grid — static col-span wrappers so Tailwind detects the classes */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Row 1: featured (2/3) + small (1/3) */}
-          <div className="lg:col-span-2"><ProjectCard project={projects[0]} featured /></div>
-          <div className="lg:col-span-1"><ProjectCard project={projects[1]} /></div>
-          {/* Row 2: three equal cards */}
-          <div className="lg:col-span-1"><ProjectCard project={projects[2]} /></div>
-          <div className="lg:col-span-1"><ProjectCard project={projects[3]} /></div>
-          <div className="lg:col-span-1"><ProjectCard project={projects[4]} /></div>
-          {/* Row 3: full-width */}
-          <div className="lg:col-span-3"><ProjectCard project={projects[5]} fullWidth /></div>
+      {desktop ? (
+        <Gallery />
+      ) : (
+        <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-5 px-4 sm:px-8 md:grid-cols-2 md:gap-6">
+          {projects.map((p, i) => (
+            <ProjectCard key={p.id} project={p} index={i} large={i < 2} />
+          ))}
         </div>
+      )}
 
-        {/* Footer link */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-12 text-center"
+      <div className="mt-14 flex justify-center px-4">
+        <a
+          href={contact.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex items-center gap-3 rounded-full border border-ink px-7 py-4 font-medium text-ink transition-colors hover:bg-ink hover:text-paper"
         >
-          <a
-            href="https://github.com/joyshah62"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem' }}
-            className="inline-flex items-center gap-2 text-[#555] hover:text-[#00ff88] transition-colors border-b border-[#333] hover:border-[#00ff88] pb-0.5"
-          >
-            <GithubIcon size={14} />
-            View all projects on GitHub →
-          </a>
-        </motion.div>
+          <GithubIcon size={16} />
+          Explore more on GitHub
+          <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:rotate-45" />
+        </a>
       </div>
     </section>
   );

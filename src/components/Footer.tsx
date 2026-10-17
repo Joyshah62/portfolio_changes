@@ -1,104 +1,50 @@
 'use client';
 
-import { motion } from 'framer-motion';
-
-const navLinks = [
-  { href: '#home', label: 'Home' },
-  { href: '#about', label: 'About' },
-  { href: '#journey', label: 'Journey' },
-  { href: '#projects', label: 'Projects' },
-  { href: '#skills', label: 'Skills' },
-  { href: '#contact', label: 'Contact' },
-];
+import { ArrowUp } from 'lucide-react';
+import { navLinks } from '@/data/site';
+import { scrollToSection } from '@/utils/scroll';
 
 export default function Footer() {
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const go = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    const id = href.replace('#', '');
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    scrollToSection(href);
   };
 
   return (
-    <footer
-      style={{
-        borderTop: '1px solid rgba(255,255,255,0.04)',
-        background: '#060606',
-      }}
-      className="py-10 px-6 sm:px-8"
-    >
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Logo + tagline */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <span
-                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '1.1rem' }}
-                className="text-[#f5f5f5]"
-              >
-                Joy
-              </span>
-              <span
-                style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '1.1rem' }}
-                className="text-[#00ff88]"
-              >
-                Shah
-              </span>
-            </div>
-            <span className="w-px h-4 bg-white/10" />
-            <span
-              style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}
-              className="text-[#444]"
-            >
-              AI/ML Engineer & Security Researcher
-            </span>
-          </div>
-
-          {/* Nav links */}
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
+    <footer data-surface="fixed" className="relative overflow-hidden bg-ink px-4 pb-8 text-paper sm:px-8">
+      <div className="mx-auto max-w-[1400px] border-t border-paper/15 pt-8">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <nav className="flex flex-wrap gap-x-6 gap-y-2">
+            {navLinks.map((l) => (
               <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => handleLinkClick(e, link.href)}
-                style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem' }}
-                className="text-[#444] hover:text-[#666] transition-colors"
+                key={l.href}
+                href={l.href}
+                onClick={(e) => go(e, l.href)}
+                className="text-sm text-paper/50 transition-colors hover:text-paper"
               >
-                {link.label}
+                {l.label}
               </a>
             ))}
-          </div>
-
-          {/* Right */}
-          <div className="flex items-center gap-4">
-            {/* Status indicator */}
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse" />
-              <span
-                style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}
-                className="text-[#00ff88]"
-              >
-                Open to opportunities
-              </span>
-            </div>
-          </div>
+          </nav>
+          <button
+            onClick={(e) => go(e, '#home')}
+            className="group inline-flex w-fit items-center gap-2 text-sm text-paper/70 hover:text-paper"
+          >
+            Back to top
+            <span className="grid h-9 w-9 place-items-center rounded-full border border-paper/20 transition-colors group-hover:bg-signal group-hover:text-ink">
+              <ArrowUp size={14} />
+            </span>
+          </button>
         </div>
 
-        <div
-          style={{ borderTop: '1px solid rgba(255,255,255,0.03)' }}
-          className="mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-2"
-        >
-          <span
-            style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}
-            className="text-[#333]"
-          >
-            © 2026 Joy Shah. Built with Next.js, Tailwind CSS & Framer Motion.
-          </span>
-          <span
-            style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem' }}
-            className="text-[#222]"
-          >
-            Designed & developed by Joy Shah.
-          </span>
+        {/* Oversized wordmark */}
+        <div aria-hidden className="display mt-10 select-none whitespace-nowrap text-center text-[23vw] leading-[0.8] text-paper/[0.07]">
+          Joy <em>Shah</em>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-2 border-t border-paper/10 pt-6 md:flex-row md:justify-between">
+          <span className="eyebrow text-paper/40">© 2026 Joy Shah · Software Engineer</span>
+          <span className="eyebrow text-paper/40">Applied AI · Backend · Web Development</span>
         </div>
       </div>
     </footer>

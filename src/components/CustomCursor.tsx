@@ -1,79 +1,62 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
+
+const FINE = '(pointer: fine)';
+const subscribe = (cb: () => void) => {
+  const mq = window.matchMedia(FINE);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+};
 
 export default function CustomCursor() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const enabled = useSyncExternalStore(subscribe, () => window.matchMedia(FINE).matches, () => false);
+  const [hovering, setHovering] = useState(false);
+  const x = useMotionValue(-100);
+  const y = useMotionValue(-100);
+  const rx = useSpring(x, { stiffness: 300, damping: 28, mass: 0.5 });
+  const ry = useSpring(y, { stiffness: 300, damping: 28, mass: 0.5 });
 
   useEffect(() => {
-    setIsMounted(true);
-    
-    // Check if we are on a device with touch/no-hover
-    if (window.matchMedia("(pointer: coarse)").matches) {
-      setIsTouchDevice(true);
-      return;
-    }
+    if (!enabled) return;
+    document.body.classList.add('has-custom-cursor');
 
-    const updateMousePosition = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+    const move = (e: PointerEvent) => {
+      x.set(e.clientX);
+      y.set(e.clientY);
     };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        window.getComputedStyle(target).cursor === "pointer" ||
-        target.tagName.toLowerCase() === "a" ||
-        target.tagName.toLowerCase() === "button" ||
-        target.closest("a") ||
-        target.closest("button")
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
+    const over = (e: PointerEvent) => {
+      const t = e.target as HTMLElement;
+      setHovering(!!t.closest('a, button'));
     };
-
-    window.addEventListener("mousemove", updateMousePosition);
-    window.addEventListener("mouseover", handleMouseOver);
-
+    window.addEventListener('pointermove', move, { passive: true });
+    window.addEventListener('pointerover', over);
     return () => {
-      window.removeEventListener("mousemove", updateMousePosition);
-      window.removeEventListener("mouseover", handleMouseOver);
+      document.body.classList.remove('has-custom-cursor');
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerover', over);
     };
-  }, []);
+  }, [enabled, x, y]);
 
-  if (!isMounted || isTouchDevice) return null;
+  if (!enabled) return null;
 
   return (
-    <>
+    <div className="pointer-events-none fixed inset-0 z-[10000] mix-blend-difference" aria-hidden>
       <motion.div
-        className="fixed top-0 left-0 w-[10px] h-[10px] bg-[#00ff88] rounded-full pointer-events-none z-[9999]"
-        animate={{
-          x: mousePosition.x - 5,
-          y: mousePosition.y - 5,
-          scale: isHovering ? 0 : 1,
-          opacity: isHovering ? 0 : 1,
-        }}
-        transition={{ type: "tween", ease: "backOut", duration: 0.15 }}
+        className="absolute left-0 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
+        style={{ x, y }}
       />
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-[9998]"
-        style={{
-          border: "1.5px solid rgba(0, 255, 136, 0.5)",
-          boxShadow: isHovering ? "0 0 20px rgba(0, 255, 136, 0.4)" : "none",
-          backgroundColor: isHovering ? "rgba(0, 255, 136, 0.1)" : "transparent",
-        }}
+        className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white"
+        style={{ x: rx, y: ry }}
         animate={{
-          x: mousePosition.x - 16,
-          y: mousePosition.y - 16,
-          scale: isHovering ? 1.5 : 1,
+          width: hovering ? 64 : 34,
+          height: hovering ? 64 : 34,
+          backgroundColor: hovering ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0)',
         }}
-        transition={{ type: "spring", stiffness: 250, damping: 20, mass: 0.5 }}
+        transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
       />
-    </>
+    </div>
   );
 }
