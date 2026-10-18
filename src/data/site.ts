@@ -225,16 +225,6 @@ export const projects: Project[] = [
     tags: ['BERT', 'ModSecurity', 'Flask', 'Chart.js', 'Docker'],
     links: [{ label: 'Source', href: 'https://github.com/joyshah62/Web-Application-Firewall' }],
   },
-  {
-    id: 'codebench',
-    title: 'CodeBench Teaching Agent',
-    cover: 'Socratic.',
-    subtitle: 'Guided coding help inside JupyterLab',
-    description:
-      'Helps students work through coding problems with questions grounded in their course and notebook. The agent can inspect, edit and test cells, then retrieve context from earlier conversations. Instructors can replay interactions and review how tools were used.',
-    tags: ['LLM Agents', 'Tool Calling', 'JupyterLab', 'FastAPI', 'React'],
-    links: [],
-  },
 ];
 
 export interface SkillCategory {

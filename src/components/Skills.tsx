@@ -25,7 +25,7 @@ export default function Skills() {
   return (
     <section id="skills" className="relative overflow-hidden px-4 py-28 sm:px-8 md:py-40">
       <div className="mx-auto max-w-[1400px]">
-        <SectionHeader index="04" label="Skills" title={<>What I work <em>with.</em></>} aside={`${skillCategories.length} areas`} />
+        <SectionHeader index="05" label="Skills" title={<>What I work <em>with.</em></>} aside={`${skillCategories.length} areas`} />
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-8">
           {/* Categories */}

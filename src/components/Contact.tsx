@@ -35,10 +35,12 @@ export default function Contact() {
       <div className="absolute inset-x-0 bottom-0 h-[70%] md:h-[78%]">
         <WaveField active={visible} reduced={reduced} />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink via-ink/30 to-transparent" />
+        {/* Fade out at the bottom so the field melts into the footer instead of being cut off */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink to-transparent" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1400px]">
-        <SectionHeader index="05" label="Contact" title={<>Have a role <em>in mind?</em></>} dark />
+        <SectionHeader index="06" label="Contact" title={<>Have a role <em>in mind?</em></>} dark />
 
         <div className="grid grid-cols-1 gap-12 md:grid-cols-12">
           <motion.p

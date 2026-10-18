@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useMotionValue, useScroll, useSpring, useTransform, type MotionValue } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { GithubIcon } from './SocialIcons';
 import { contact, projects, type Project } from '@/data/site';
@@ -44,7 +44,7 @@ const covers: Array<{ bg: string; fg: string; pattern: string; size?: string }> 
   },
 ];
 
-function ProjectCard({ project, index, large, wide }: { project: Project; index: number; large?: boolean; wide?: boolean }) {
+function ProjectCard({ project, index, wide, focus }: { project: Project; index: number; wide?: boolean; focus?: MotionValue<number> }) {
   const ref = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0.5);
   const my = useMotionValue(0.5);
@@ -56,6 +56,9 @@ function ProjectCard({ project, index, large, wide }: { project: Project; index:
     [glareX, glareY],
     ([x, y]) => `radial-gradient(400px circle at ${x} ${y}, rgba(255,255,255,0.28), transparent 50%)`,
   );
+  // Sheen sweeps across the cover as the card passes the centre of the screen
+  const sheenX = useTransform(focus ?? mx, focus ? [-1, 1] : [0, 1], ['130%', '-30%']);
+  const sheen = useTransform(sheenX, (x) => `linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%) ${x} 0 / 250% 100% no-repeat`);
   const cover = covers[index % covers.length];
   const primary = project.links[0];
 
@@ -88,7 +91,7 @@ function ProjectCard({ project, index, large, wide }: { project: Project; index:
       >
         {/* Cover */}
         <div
-          className={`relative overflow-hidden ${wide ? 'aspect-[2/1]' : large ? 'aspect-[16/9]' : 'aspect-[16/10]'}`}
+          className={`relative overflow-hidden ${wide ? 'aspect-[2/1]' : 'aspect-[16/10]'}`}
           style={{ background: cover.bg, color: cover.fg }}
         >
           <div
@@ -99,19 +102,20 @@ function ProjectCard({ project, index, large, wide }: { project: Project; index:
             className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
             style={{ background: glare }}
           />
+          {focus && <motion.div className="pointer-events-none absolute inset-0" style={{ background: sheen }} />}
           <div className="absolute inset-0 flex flex-col justify-between p-5 sm:p-7" style={{ transform: 'translateZ(40px)' }}>
             <div className="flex items-start justify-between">
               <span className="eyebrow opacity-80">No. {String(index + 1).padStart(2, '0')}</span>
               <span className="eyebrow max-w-[60%] text-right opacity-80">{project.subtitle}</span>
             </div>
-            <div className={`display italic ${large ? 'text-[clamp(3rem,7vw,6.5rem)]' : 'text-[clamp(2.6rem,5vw,4.4rem)]'}`}>
+            <div className="display italic text-[clamp(2.4rem,5vw,4.4rem)]">
               {project.cover}
             </div>
           </div>
         </div>
 
         {/* Body */}
-        <div className="flex flex-1 flex-col p-6 sm:p-8">
+        <div className="flex flex-1 flex-col p-5 sm:p-8">
           <div className="flex items-start justify-between gap-4">
             <h3 className="font-serif text-[clamp(1.7rem,2.4vw,2.3rem)] leading-[1.05] tracking-tight text-ink">
               {project.title}
@@ -134,8 +138,10 @@ function ProjectCard({ project, index, large, wide }: { project: Project; index:
               {project.award}
             </span>
           )}
-          <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">{project.description}</p>
-          <div className="mt-auto flex flex-wrap items-center gap-2 pt-6">
+          <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft max-lg:line-clamp-5 [@media(max-height:720px)]:line-clamp-3">
+            {project.description}
+          </p>
+          <div className="mt-auto flex flex-wrap items-center gap-2 pt-5 sm:pt-6">
             {project.tags.map((tag) => (
               <span key={tag} className="rounded-full bg-paper-2 px-3 py-1 font-mono text-[0.68rem] text-ink-soft">
                 {tag}
@@ -163,22 +169,43 @@ function ProjectCard({ project, index, large, wide }: { project: Project; index:
   );
 }
 
-const DESKTOP = '(min-width: 1024px)';
-const subscribeDesktop = (cb: () => void) => {
-  const mq = window.matchMedia(DESKTOP);
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
-};
+/** One card in the gallery: angle, scale and sheen follow its distance from the screen centre. */
+function GalleryItem({ project, index, x, center }: { project: Project; index: number; x: MotionValue<number>; center: number }) {
+  // -1 = a full screen-width left of centre, 0 = centred, 1 = right
+  const focus = useTransform(x, (v) => {
+    const vw = typeof window === 'undefined' ? 1 : window.innerWidth;
+    return Math.max(-1, Math.min(1, (center + v - vw / 2) / vw));
+  });
+  // Phones keep cards close together, so they turn a little less
+  const maxTurn = typeof window !== 'undefined' && window.innerWidth < 640 ? 20 : 28;
+  const rotateY = useTransform(focus, [-1, 0, 1], [maxTurn, 0, -maxTurn]);
+  const scale = useTransform(focus, [-1, 0, 1], [0.86, 1, 0.86]);
+  const opacity = useTransform(focus, [-1, -0.6, 0, 0.6, 1], [0.35, 0.8, 1, 0.8, 0.35]);
+  // The most centred card always draws on top of its turning neighbours
+  const zIndex = useTransform(focus, (f) => Math.round((1 - Math.abs(f)) * 100));
+  return (
+    <motion.div
+      style={{ rotateY, scale, opacity, zIndex, transformPerspective: 1100 }}
+      className="w-[84vw] max-w-[520px] shrink-0 sm:w-[min(520px,62vw)] lg:w-[min(520px,38vw)]"
+    >
+      <ProjectCard project={project} index={index} wide focus={focus} />
+    </motion.div>
+  );
+}
 
 /** Pins the section and turns vertical scroll into a horizontal pan across the cards. */
 function Gallery() {
   const section = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const [distance, setDistance] = useState(0);
+  const [centers, setCenters] = useState<number[]>([]);
 
   useEffect(() => {
     const el = track.current!;
-    const measure = () => setDistance(Math.max(0, el.scrollWidth - window.innerWidth));
+    const measure = () => {
+      setDistance(Math.max(0, el.scrollWidth - window.innerWidth));
+      setCenters(Array.from(el.children).map((c) => (c as HTMLElement).offsetLeft + (c as HTMLElement).offsetWidth / 2));
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
@@ -196,20 +223,18 @@ function Gallery() {
 
   return (
     <div ref={section} className="relative" style={{ height: `calc(100svh + ${distance}px)` }}>
-      <div className="sticky top-0 flex h-[100svh] flex-col justify-center gap-8 overflow-hidden pt-16">
+      <div className="sticky top-0 flex h-[100svh] flex-col justify-center gap-6 overflow-hidden pt-16 sm:gap-8">
         <motion.div
           ref={track}
           style={{ x }}
-          className="flex w-max gap-6 pl-[max(2rem,calc((100vw-1400px)/2+2rem))] pr-[max(2rem,calc((100vw-1400px)/2+2rem))]"
+          className="flex w-max items-center gap-4 pl-[8vw] pr-[8vw] sm:gap-6 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-[max(2rem,calc((100vw-1400px)/2+2rem))]"
         >
           {projects.map((p, i) => (
-            <div key={p.id} className="w-[min(520px,38vw)] shrink-0">
-              <ProjectCard project={p} index={i} wide />
-            </div>
+            <GalleryItem key={p.id} project={p} index={i} x={x} center={centers[i] ?? 0} />
           ))}
         </motion.div>
 
-        <div className="mx-auto flex w-full max-w-[1400px] items-center gap-6 px-8">
+        <div className="mx-auto flex w-full max-w-[1400px] items-center gap-4 px-[8vw] sm:gap-6 lg:px-8">
           <span className="eyebrow tabular-nums text-ink">
             <motion.span>{counter}</motion.span>
             <span className="text-muted"> / {String(projects.length).padStart(2, '0')}</span>
@@ -225,8 +250,6 @@ function Gallery() {
 }
 
 export default function Projects() {
-  const desktop = useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => false);
-
   return (
     <section id="projects" className="relative py-28 md:py-40">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-8">
@@ -238,15 +261,7 @@ export default function Projects() {
         />
       </div>
 
-      {desktop ? (
-        <Gallery />
-      ) : (
-        <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-5 px-4 sm:px-8 md:grid-cols-2 md:gap-6">
-          {projects.map((p, i) => (
-            <ProjectCard key={p.id} project={p} index={i} large={i < 2} />
-          ))}
-        </div>
-      )}
+      <Gallery />
 
       <div className="mt-14 flex justify-center px-4">
         <a

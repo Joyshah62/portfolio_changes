@@ -14,7 +14,9 @@ const PortraitScene = dynamic(() => import('./three/PortraitScene'), { ssr: fals
 function CountUp({ value, suffix, isFloat }: { value: number; suffix: string; isFloat?: boolean }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-50px' });
+  // Inset only the bottom edge: an all-sides inset hides narrow numbers (like "2") that sit
+  // near the left edge of a phone screen, so they would never start counting.
+  const inView = useInView(ref, { once: true, margin: '0px 0px -50px 0px' });
 
   useEffect(() => {
     if (!inView) return;

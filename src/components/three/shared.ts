@@ -40,3 +40,6 @@ export function useInViewport(ref: RefObject<HTMLElement | null>, rootMargin = '
 export function isCoarsePointer() {
   return typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 }
+
+/** Last click inside the flow field, consumed by its scene on the next frame (t = 1 while pending). */
+export const flowShock = { x: 0, y: 0, t: 0 };
