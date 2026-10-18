@@ -4,6 +4,7 @@ import "./globals.css";
 import CustomCursor from "@/components/CustomCursor";
 import MotionProvider from "@/components/MotionProvider";
 import { themeInitScript } from "@/utils/theme";
+import { site, siteUrl } from "@/lib/seo";
 
 const serif = Instrument_Serif({
   subsets: ["latin"],
@@ -27,9 +28,29 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Joy Shah | Software Engineer & Applied AI",
-  description: "Software engineer working on AI tutors at Rutgers, web attack detection, and voice interview tools. Three internships, two hackathon wins, and IEEE research. Graduating May 2027.",
-  keywords: ["Joy Shah", "Software Engineer", "AI Engineer", "LLM Agents", "RAG", "Rutgers", "Portfolio"],
+  metadataBase: new URL(siteUrl),
+  title: { default: site.title, template: `%s | ${site.name}` },
+  description: site.description,
+  applicationName: site.name,
+  authors: [{ name: site.name, url: siteUrl }],
+  creator: site.name,
+  keywords: [
+    "Joy Shah", "Software Engineer", "AI Engineer", "Applied AI", "LLM Agents", "RAG",
+    "Machine Learning", "ML Security", "FastAPI", "React", "Rutgers", "New Brunswick", "Portfolio",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: site.name,
+    title: site.title,
+    description: site.description,
+    locale: site.locale,
+  },
+  twitter: { card: "summary_large_image", title: site.title, description: site.description },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  category: "technology",
+  formatDetection: { telephone: false, address: false, email: false },
 };
 
 export const viewport: Viewport = {

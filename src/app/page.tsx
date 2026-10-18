@@ -9,10 +9,16 @@ import Playground from '@/components/Playground';
 import Skills from '@/components/Skills';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
+import { structuredData } from '@/lib/seo';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-paper">
+      <script
+        type="application/ld+json"
+        // Escape "<" so the JSON can never close the script tag early
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData()).replace(/</g, '\\u003c') }}
+      />
       <Navbar />
       <Hero />
       <MarqueeBanner />
