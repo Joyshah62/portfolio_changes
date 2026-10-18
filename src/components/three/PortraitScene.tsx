@@ -22,9 +22,8 @@ interface Sample {
   height: number;
 }
 
-// Crop to head and shoulders; fade the busy background out radially
+// Crop to head and shoulders; the dots fill the whole rectangle with a thin soft edge
 const CROP = { x: 0.06, y: 0.06, w: 0.88, h: 0.72 };
-const FACE = { x: 0.5, y: 0.42 };
 
 function samplePhoto(img: HTMLImageElement, cols: number): Sample {
   const rows = Math.round(cols * ((CROP.h * img.height) / (CROP.w * img.width)));
@@ -68,9 +67,9 @@ function samplePhoto(img: HTMLImageElement, cols: number): Sample {
       const k = y * cols + x;
       const lum = Math.min(1, Math.max(0, L[k] + 1.6 * (L[k] - blur[k])));
       const u = x / cols, v = y / rows;
-      // Elliptical vignette centred on the face
-      const dx = (u - FACE.x) / 0.4, dy = (v - FACE.y) / 0.56;
-      const mask = 1 - THREE.MathUtils.smoothstep(Math.sqrt(dx * dx + dy * dy), 0.62, 1);
+      // Rectangular frame: full strength inside, fading over the last few percent at each edge
+      const edge = Math.min(u, 1 - u, v, 1 - v);
+      const mask = THREE.MathUtils.smoothstep(edge, 0, 0.05);
       if (mask < 0.025) continue;
       const px = (u - 0.5) * W, py = (0.5 - v) * H, pz = (lum - 0.5) * 0.2;
       pos.push(px, py, pz);

@@ -10,7 +10,7 @@ import { useMagnetic } from '@/hooks/useMagnetic';
 import { useInViewport } from './three/shared';
 import SectionHeader from './SectionHeader';
 
-const WaveField = dynamic(() => import('./three/WaveField'), { ssr: false });
+const PaperPlane = dynamic(() => import('./three/PaperPlane'), { ssr: false });
 
 export default function Contact() {
   const ref = useRef<HTMLElement>(null);
@@ -30,17 +30,14 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" data-surface="fixed" ref={ref} className="relative overflow-hidden bg-ink px-4 pb-16 pt-28 text-paper sm:px-8 md:pt-40">
-      {/* 3D voxel field */}
-      <div className="absolute inset-x-0 bottom-0 h-[70%] md:h-[78%]">
-        <WaveField active={visible} reduced={reduced} />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink via-ink/30 to-transparent" />
-        {/* Fade out at the bottom so the field melts into the footer instead of being cut off */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink to-transparent" />
+    <section id="contact" ref={ref} className="relative overflow-hidden bg-paper px-4 pb-16 pt-28 text-ink sm:px-8 md:pt-40">
+      {/* Paper plane: roams the section, follows the cursor, circles "Get in touch" on hover */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <PaperPlane active={visible} reduced={reduced} />
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1400px]">
-        <SectionHeader index="06" label="Contact" title={<>Have a role <em>in mind?</em></>} dark />
+        <SectionHeader index="06" label="Contact" title={<>Have a role <em>in mind?</em></>} />
 
         <div className="grid grid-cols-1 gap-12 md:grid-cols-12">
           <motion.p
@@ -48,7 +45,7 @@ export default function Contact() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.8 }}
-            className="max-w-lg text-[1.1rem] leading-relaxed text-paper/70 md:col-span-6"
+            className="max-w-lg text-[1.1rem] leading-relaxed text-ink-soft md:col-span-6"
           >
             I&apos;m looking for software and AI engineering roles where I can contribute across models,
             backend services, and product development. I graduate from Rutgers in May 2027 and am open
@@ -64,17 +61,18 @@ export default function Contact() {
           >
             <a
               ref={cta}
+              data-plane-target
               href={`mailto:${contact.email}`}
-              className="group inline-flex items-center gap-4 rounded-full bg-signal py-3 pl-8 pr-3 text-lg font-semibold text-ink shadow-[0_20px_60px_-15px_rgba(255,79,31,0.6)]"
+              className="group inline-flex items-center gap-4 rounded-full bg-signal py-3 pl-8 pr-3 text-lg font-semibold text-on-signal shadow-[0_20px_60px_-15px_rgba(255,79,31,0.6)]"
             >
               Get in touch
-              <span className="grid h-12 w-12 place-items-center rounded-full bg-ink text-paper transition-transform duration-500 group-hover:rotate-45">
+              <span className="grid h-12 w-12 place-items-center rounded-full bg-on-signal text-[#f5f1e8] transition-transform duration-500 group-hover:rotate-45">
                 <ArrowUpRight size={20} />
               </span>
             </a>
             <button
               onClick={copy}
-              className="inline-flex items-center gap-2 font-mono text-sm text-paper/60 transition-colors hover:text-paper"
+              className="inline-flex items-center gap-2 font-mono text-sm text-ink-soft transition-colors hover:text-ink"
             >
               {copied ? <Check size={14} className="text-signal" /> : <Copy size={14} />}
               {copied ? 'Copied to clipboard' : contact.email}
@@ -82,20 +80,20 @@ export default function Contact() {
           </motion.div>
         </div>
 
-        <div className="mt-[22vh] grid grid-cols-2 gap-px overflow-hidden rounded-[24px] border border-paper/15 bg-paper/15 backdrop-blur-md md:mt-[28vh] md:grid-cols-4">
+        <div className="mt-[22vh] grid grid-cols-2 gap-px overflow-hidden rounded-[24px] border border-line bg-line backdrop-blur-md md:mt-[28vh] md:grid-cols-4">
           {[
             { label: 'GitHub', value: '@joyshah62', href: contact.github, icon: GithubIcon },
             { label: 'LinkedIn', value: 'Joy Shah', href: contact.linkedin, icon: LinkedinIcon },
-            { label: 'Résumé', value: 'View PDF ↗', href: contact.resume },
+            { label: 'Résumé', value: 'View PDF', href: contact.resume },
             { label: 'Based in', value: contact.location },
           ].map(({ label, value, href, icon: Icon }) => {
             const inner = (
               <>
-                <span className="eyebrow flex items-center gap-2 text-paper/50">
+                <span className="eyebrow flex items-center gap-2 text-muted">
                   {Icon && <Icon size={12} />}
                   {label}
                 </span>
-                <span className="mt-3 block font-serif text-2xl text-paper">{value}</span>
+                <span className="mt-3 block font-serif text-2xl text-ink">{value}</span>
               </>
             );
             return href ? (
@@ -104,12 +102,12 @@ export default function Contact() {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-ink/70 p-5 transition-colors hover:bg-ink/40 sm:p-6"
+                className="bg-paper/80 p-5 transition-colors hover:bg-card sm:p-6"
               >
                 {inner}
               </a>
             ) : (
-              <div key={label} className="bg-ink/70 p-5 sm:p-6">
+              <div key={label} className="bg-paper/80 p-5 sm:p-6">
                 {inner}
               </div>
             );

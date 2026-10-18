@@ -1,18 +1,19 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useScroll, useSpring, useTransform, type MotionValue } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { motion, useInView, useMotionValueEvent, useScroll, useSpring, useTransform, type MotionValue } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { contact, journey, type TimelineEntry } from '@/data/site';
 import SectionHeader from './SectionHeader';
+import IsoFigure, { type IsoTone } from './iso/IsoFigure';
 
 // Each card gets its own material from the palette
-const palettes = [
-  { bg: 'bg-ink', fg: 'text-paper', sub: 'text-paper/65', tag: 'border-paper/20 text-paper/80', num: 'text-signal' },
-  { bg: 'bg-card', fg: 'text-ink', sub: 'text-ink-soft', tag: 'border-line text-ink-soft', num: 'text-signal' },
-  { bg: 'bg-cobalt', fg: 'text-paper', sub: 'text-paper/75', tag: 'border-paper/25 text-paper/85', num: 'text-paper' },
-  { bg: 'bg-paper-2', fg: 'text-ink', sub: 'text-ink-soft', tag: 'border-ink/15 text-ink-soft', num: 'text-signal' },
-  { bg: 'bg-signal', fg: 'text-ink', sub: 'text-ink/75', tag: 'border-ink/20 text-ink/80', num: 'text-ink' },
+const palettes: Array<{ bg: string; fg: string; sub: string; tag: string; num: string; tone: IsoTone }> = [
+  { bg: 'bg-ink', fg: 'text-paper', sub: 'text-paper/65', tag: 'border-paper/20 text-paper/80', num: 'text-signal', tone: 'dark' },
+  { bg: 'bg-card', fg: 'text-ink', sub: 'text-ink-soft', tag: 'border-line text-ink-soft', num: 'text-signal', tone: 'surface' },
+  { bg: 'bg-cobalt', fg: 'text-paper', sub: 'text-paper/75', tag: 'border-paper/25 text-paper/85', num: 'text-paper', tone: 'cobalt' },
+  { bg: 'bg-paper-2', fg: 'text-ink', sub: 'text-ink-soft', tag: 'border-ink/15 text-ink-soft', num: 'text-signal', tone: 'surface' },
+  { bg: 'bg-signal', fg: 'text-ink', sub: 'text-ink/75', tag: 'border-ink/20 text-ink/80', num: 'text-ink', tone: 'signal' },
 ];
 
 function Card({ entry, index, total, progress }: { entry: TimelineEntry; index: number; total: number; progress: MotionValue<number> }) {
@@ -22,8 +23,17 @@ function Card({ entry, index, total, progress }: { entry: TimelineEntry; index: 
   const scale = useTransform(progress, [start, 1], [1, 1 - (total - 1 - index) * 0.045]);
   const shade = useTransform(progress, [(index + 1) / total, 1], [0, index === total - 1 ? 0 : 0.35]);
 
+  // The card on top of the stack lights its figure; loops stop once the section leaves the screen
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: '-10% 0px' });
+  const [active, setActive] = useState(index === 0);
+  useMotionValueEvent(progress, 'change', (v) => {
+    const on = (v >= start || index === 0) && (v < (index + 1) / total || index === total - 1);
+    requestAnimationFrame(() => setActive(on));
+  });
+
   return (
-    <div className="sticky h-[78svh]" style={{ top: `calc(96px + ${index * 26}px)` }}>
+    <div ref={ref} className="sticky h-[78svh]" style={{ top: `calc(96px + ${index * 26}px)` }}>
       <motion.article
         data-surface={[0, 2, 4].includes(index % palettes.length) ? 'fixed' : undefined}
         style={{ scale }}
@@ -35,9 +45,16 @@ function Card({ entry, index, total, progress }: { entry: TimelineEntry; index: 
             <span className={`display text-7xl italic md:text-[7rem] ${c.num}`}>{entry.number}</span>
             <span className={`eyebrow ${c.sub}`}>{entry.period}</span>
           </div>
-          <div className="md:col-span-4">
+          <div className="flex flex-col md:col-span-4">
             <h3 className="display text-[clamp(2.2rem,3.6vw,3.6rem)]">{entry.role}</h3>
             <div className={`mt-3 text-sm font-medium ${c.sub}`}>{entry.org}</div>
+            {/* Phones already fill the card with text, so the figure is a desktop-only accent */}
+            <IsoFigure
+              figure={entry.number}
+              tone={c.tone}
+              live={active && inView}
+              className="mt-auto hidden aspect-[1.3] w-full max-w-[340px] pt-6 md:block"
+            />
           </div>
           <div className="flex flex-col md:col-span-5">
             <p className={`text-[1rem] leading-relaxed ${c.sub}`}>{entry.description}</p>

@@ -38,7 +38,7 @@ export default function FlowField() {
   if (hydrated && prefersReduced) return null;
 
   return (
-    <section ref={ref} data-surface="fixed" aria-label="Interlude" className="relative h-[320svh] bg-ink text-paper">
+    <section ref={ref} data-surface="fixed" aria-label="Interlude" className="relative h-[500svh] bg-ink text-paper">
       <div
         className="sticky top-0 h-[100svh] cursor-crosshair overflow-hidden"
         onPointerDown={(e) => Object.assign(flowShock, { x: e.clientX, y: e.clientY, t: 1 })}

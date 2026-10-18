@@ -12,6 +12,7 @@ export default function Navbar() {
   const [active, setActive] = useState('home');
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [overFooter, setOverFooter] = useState(false);
   const ctaRef = useMagnetic(0.3);
 
   useEffect(() => {
@@ -35,6 +36,15 @@ export default function Navbar() {
     return () => observers.forEach((o) => o?.disconnect());
   }, []);
 
+  // The footer is the one band that stays dark in both themes; switch the bar to its dark styling over it
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+    const obs = new IntersectionObserver(([e]) => setOverFooter(e.isIntersecting), { rootMargin: '0px 0px -92% 0px' });
+    obs.observe(footer);
+    return () => obs.disconnect();
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
   }, [open]);
@@ -45,7 +55,7 @@ export default function Navbar() {
     scrollToSection(href);
   };
 
-  const onDark = active === 'contact';
+  const onDark = overFooter;
 
   return (
     <>

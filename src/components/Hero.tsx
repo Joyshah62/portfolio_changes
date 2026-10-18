@@ -143,7 +143,7 @@ export default function Hero() {
   }
 
   return (
-    <section id="home" ref={ref} className="hero-shell h-[320svh]">
+    <section id="home" ref={ref} className="hero-shell h-[600svh]">
       <noscript><style>{`.loading-intro{display:none!important}.hero-intro-copy>*{opacity:1!important;transform:none!important}.hero-name-line>span{transform:none!important}`}</style></noscript>
       <LoadingIntro ready={sceneReady} onReveal={onEntered} />
       <div className="hero-stage sticky top-0 h-[100svh] overflow-hidden">

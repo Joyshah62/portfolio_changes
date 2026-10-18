@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { motion, useMotionValue, useScroll, useSpring, useTransform, type MotionValue } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { GithubIcon } from './SocialIcons';
@@ -169,6 +169,15 @@ function ProjectCard({ project, index, wide, focus }: { project: Project; index:
   );
 }
 
+const PHONE = '(max-width: 639px)';
+const subscribePhone = (onChange: () => void) => {
+  const mq = window.matchMedia(PHONE);
+  mq.addEventListener('change', onChange);
+  return () => mq.removeEventListener('change', onChange);
+};
+/** Phone-width check that renders like the server first (not a phone), so hydration matches, then updates */
+const useIsPhone = () => useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE).matches, () => false);
+
 /** One card in the gallery: angle, scale and sheen follow its distance from the screen centre. */
 function GalleryItem({ project, index, x, center }: { project: Project; index: number; x: MotionValue<number>; center: number }) {
   // -1 = a full screen-width left of centre, 0 = centred, 1 = right
@@ -177,7 +186,7 @@ function GalleryItem({ project, index, x, center }: { project: Project; index: n
     return Math.max(-1, Math.min(1, (center + v - vw / 2) / vw));
   });
   // Phones keep cards close together, so they turn a little less
-  const maxTurn = typeof window !== 'undefined' && window.innerWidth < 640 ? 20 : 28;
+  const maxTurn = useIsPhone() ? 20 : 28;
   const rotateY = useTransform(focus, [-1, 0, 1], [maxTurn, 0, -maxTurn]);
   const scale = useTransform(focus, [-1, 0, 1], [0.86, 1, 0.86]);
   const opacity = useTransform(focus, [-1, -0.6, 0, 0.6, 1], [0.35, 0.8, 1, 0.8, 0.35]);

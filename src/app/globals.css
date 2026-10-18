@@ -457,3 +457,92 @@ body::after {
 @property --x { syntax: '<length-percentage>'; inherits: true; initial-value: 50%; }
 @property --r { syntax: '<length>'; inherits: true; initial-value: 0px; }
 @media (prefers-reduced-motion: reduce) { .footer-mark-glow { animation: none; } }
+
+/* ============================================================
+   ISO-GLOW FIGURES (Journey cards)
+   Hairline isometric figures after the iso-glow skill: dim structure, one accent on what is live.
+   Each tone matches the card surface the figure sits on.
+============================================================ */
+.iso-tone-dark {
+  --body: #1b1a17; --deck: #22201c; --recess: #100f0d;
+  --line: rgb(237 232 221 / 0.3); --detail: rgb(237 232 221 / 0.12); --ink: rgb(237 232 221 / 0.5);
+  --glass: #100f0d; --glass-on: #2a170f; --accent: var(--color-signal); --accent-hi: #ffa073;
+}
+.iso-tone-surface {
+  --body: var(--color-card); --deck: var(--color-paper); --recess: var(--color-paper-2);
+  --line: color-mix(in srgb, var(--color-ink) 42%, transparent); --detail: color-mix(in srgb, var(--color-ink) 15%, transparent);
+  --ink: var(--color-muted); --glass: var(--color-paper-2); --glass-on: color-mix(in srgb, var(--color-signal) 14%, var(--color-card));
+  --accent: var(--color-signal); --accent-hi: #ff7a4d;
+}
+.iso-tone-cobalt {
+  --body: #2a37e6; --deck: #3846ff; --recess: #2230c9;
+  --line: rgb(245 241 232 / 0.55); --detail: rgb(245 241 232 / 0.22); --ink: rgb(245 241 232 / 0.7);
+  --glass: #1f2bb8; --glass-on: #1f2bb8; --accent: #f5f1e8; --accent-hi: #ffffff;
+}
+.iso-tone-signal {
+  --body: #ff5a2c; --deck: #ff6a3e; --recess: #e8461a;
+  --line: rgb(20 18 16 / 0.55); --detail: rgb(20 18 16 / 0.2); --ink: rgb(20 18 16 / 0.6);
+  --glass: #e8461a; --glass-on: #ff8a5c; --accent: #141210; --accent-hi: #141210;
+}
+
+.iso .face { fill: var(--body); stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.iso .face.top { fill: var(--deck); }
+.iso .detail { fill: none; stroke: var(--detail); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.iso .label { fill: var(--ink); font-family: var(--font-mono); }
+.iso .scr { fill: var(--accent-hi); font-family: var(--font-mono); }
+.iso .glass { fill: var(--glass); stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.iso .halo { fill: var(--accent); opacity: 0; }
+.iso .led { fill: var(--detail); }
+.iso .wire { fill: none; stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
+.iso .nbcell, .iso .bubble { fill: none; stroke: var(--detail); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.iso .pk, .iso .lv-show { opacity: 0; }
+.iso .band { fill: var(--detail); }
+
+.iso :is(.face, .glass, .halo, .led, .wire, .nbcell, .bubble, .band, .detail, .label, .scr) {
+  transition: fill 500ms ease-out, stroke 500ms ease-out, opacity 400ms ease-out;
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* Live */
+.iso[data-live="true"] .lv-face { fill: var(--accent); stroke: var(--accent-hi); }
+.iso[data-live="true"] .lv-face.top { fill: var(--accent-hi); }
+.iso[data-live="true"] .lv-glass { fill: var(--glass-on); stroke: var(--accent); }
+.iso[data-live="true"] .halo { opacity: 0.3; }
+.iso[data-live="true"] .lv-led { fill: var(--accent); }
+.iso[data-live="true"] .lv-wire { stroke: var(--accent); }
+.iso[data-live="true"] .lv-detail { stroke: var(--accent); }
+.iso[data-live="true"] .nbcell { stroke: var(--accent); }
+.iso[data-live="true"] .bubble { stroke: var(--accent); fill: var(--glass-on); }
+.iso[data-live="true"] .bubble.scam, .iso[data-live="true"] .band { fill: var(--accent); stroke: var(--accent-hi); }
+.iso[data-live="true"] .lv-show { opacity: 1; }
+.iso[data-live="true"] .lv-hide { opacity: 0; }
+/* Loops below only run while the card is the active one and on screen (Journey sets data-live) */
+.iso[data-live="true"] .blink-live { fill: var(--accent); animation: iso-blink 1s steps(1) infinite; }
+.iso[data-live="true"] .pk-in { animation: iso-pk-in 3s linear calc(var(--i) * 1s) infinite; }
+.iso[data-live="true"] .pk-out { animation: iso-pk-out 3s linear calc(var(--i) * 1s) infinite; }
+
+/* Glow only reads on dark surfaces: the dark card, and the theme-following cards in dark mode */
+.iso-tone-dark[data-live="true"] .lv-glow,
+.iso-tone-cobalt[data-live="true"] .lv-glow,
+:root[data-theme="dark"] .iso-tone-surface[data-live="true"] .lv-glow { filter: var(--iso-glow); }
+:root[data-theme="light"] .iso-tone-surface .halo, .iso-tone-signal .halo { display: none; }
+
+@keyframes iso-blink { 50% { opacity: 0.2; } }
+/* An item travels to the gate and is absorbed; clean ones reappear on the far side (iso-pk-out) */
+@keyframes iso-pk-in {
+  0% { transform: translate(0, 0); opacity: 0; }
+  5% { opacity: 1; }
+  40% { transform: translate(var(--tx), var(--ty)); opacity: 1; }
+  48%, 100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+}
+@keyframes iso-pk-out {
+  0%, 48% { transform: translate(0, 0); opacity: 0; }
+  52% { opacity: 1; }
+  88% { transform: translate(var(--tx), var(--ty)); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iso * { transition: none !important; animation: none !important; }
+  .iso[data-live="true"] .pk-bad { opacity: 1; transform: translate(var(--tx), var(--ty)); }
+}
