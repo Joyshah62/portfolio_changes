@@ -37,7 +37,7 @@ export default function Contact() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1400px]">
-        <SectionHeader index="06" label="Contact" title={<>Have a role <em>in mind?</em></>} />
+        <SectionHeader index="06" label="Contact" title={<>Let&apos;s <em>get in touch.</em></>} />
 
         <div className="grid grid-cols-1 gap-12 md:grid-cols-12">
           <motion.p
@@ -47,9 +47,9 @@ export default function Contact() {
             transition={{ duration: 0.8 }}
             className="max-w-lg text-[1.1rem] leading-relaxed text-ink-soft md:col-span-6"
           >
-            I&apos;m looking for software and AI engineering roles where I can contribute across models,
-            backend services, and product development. I graduate from Rutgers in May 2027 and am open
-            to relocation. If that fits your team, I&apos;d like to hear what you&apos;re working on.
+            I&apos;m interested in software and AI engineering roles, especially work on AI applications,
+            backend systems, and developer tools. I graduate from Rutgers in May 2027 and am open
+            to relocation. Reach out about a role, a collaboration, or a question about my work.
           </motion.p>
 
           <motion.div
@@ -65,7 +65,7 @@ export default function Contact() {
               href={`mailto:${contact.email}`}
               className="group inline-flex items-center gap-4 rounded-full bg-signal py-3 pl-8 pr-3 text-lg font-semibold text-on-signal shadow-[0_20px_60px_-15px_rgba(255,79,31,0.6)]"
             >
-              Get in touch
+              Email me
               <span className="grid h-12 w-12 place-items-center rounded-full bg-on-signal text-[#f5f1e8] transition-transform duration-500 group-hover:rotate-45">
                 <ArrowUpRight size={20} />
               </span>
@@ -75,7 +75,7 @@ export default function Contact() {
               className="inline-flex items-center gap-2 font-mono text-sm text-ink-soft transition-colors hover:text-ink"
             >
               {copied ? <Check size={14} className="text-signal" /> : <Copy size={14} />}
-              {copied ? 'Copied to clipboard' : contact.email}
+              {copied ? 'Email copied' : contact.email}
             </button>
           </motion.div>
         </div>

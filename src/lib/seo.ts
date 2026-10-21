@@ -11,7 +11,7 @@ export const site = {
   title: 'Joy Shah | Software Engineer & Applied AI',
   shortTitle: 'Joy Shah',
   description:
-    'Joy Shah is a software engineer and Rutgers M.S. CS student building applied AI: LLM agents, RAG, and ML security. Three internships, two hackathon wins, IEEE research.',
+    'I’m Joy Shah, a software engineer and Rutgers Computer Science master’s student. Explore my work in AI applications, backend systems, and machine learning for security.',
   tagline: 'Software engineer & applied AI',
   locale: 'en_US',
 };

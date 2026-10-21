@@ -85,7 +85,7 @@ export default function SkillWorkflow({ domain, reducedMotion }: { domain: strin
     <div className={styles.workflow}>
       <div className={styles.workflowHeading}>
         <span>{workflow.label}</span>
-        <span>INTERACTIVE DEMO</span>
+        <span>EXPLORE THE WORKFLOW</span>
       </div>
       <svg viewBox="0 0 304 152" className={styles.workflowMap} aria-hidden="true">
         <defs>
@@ -118,7 +118,7 @@ export default function SkillWorkflow({ domain, reducedMotion }: { domain: strin
       </div>
       <p className={styles.workflowDetail} aria-live="polite">{workflow.steps[step][1]}</p>
       <button type="button" className={styles.workflowNext} onClick={() => setStep((step + 1) % 3)}>
-        {step === 2 ? 'Replay workflow' : 'Next stage'}
+        {step === 2 ? 'Start again' : 'Next step'}
         {step === 2 ? <RotateCcw size={13} /> : <ArrowRight size={13} />}
       </button>
     </div>

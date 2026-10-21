@@ -124,7 +124,7 @@ export default function Navbar() {
             href={`mailto:${contact.email}`}
             className="hidden lg:inline-flex items-center gap-2 rounded-full bg-signal px-5 py-2.5 text-[0.82rem] font-semibold text-on-signal transition-shadow duration-300 hover:shadow-[0_10px_30px_-8px_rgba(255,79,31,0.7)]"
           >
-            Let&apos;s talk <ArrowUpRight size={15} strokeWidth={2.4} />
+            Contact me <ArrowUpRight size={15} strokeWidth={2.4} />
           </a>
 
           {/* Mobile toggle */}
@@ -183,7 +183,7 @@ export default function Navbar() {
               href={`mailto:${contact.email}`}
               className="inline-flex w-fit items-center gap-2 rounded-full bg-signal px-6 py-3 font-semibold text-ink"
             >
-              Let&apos;s talk <ArrowUpRight size={16} />
+              Contact me <ArrowUpRight size={16} />
             </motion.a>
           </motion.div>
         )}

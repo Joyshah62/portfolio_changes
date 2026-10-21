@@ -40,7 +40,7 @@ export default function SectionHeader({ index, label, title, aside, dark }: Prop
       <div className="overflow-hidden">
         <motion.h2
           variants={heading}
-          className={`mt-6 pb-[0.1em] text-[clamp(2.6rem,6.6vw,6.25rem)] font-semibold leading-[0.98] tracking-[-0.05em] [&_em]:text-accent ${dark ? 'text-paper' : 'text-ink'}`}
+          className={`mt-6 pb-[0.22em] text-[clamp(2.6rem,6.6vw,6.25rem)] font-semibold leading-[0.98] tracking-[-0.05em] [&_em]:text-accent ${dark ? 'text-paper' : 'text-ink'}`}
         >
           {title}
         </motion.h2>

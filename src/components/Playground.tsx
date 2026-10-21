@@ -184,8 +184,8 @@ export default function Playground() {
       <div className="mx-auto max-w-[1400px]">
         <SectionHeader
           index="04"
-          label="Playground"
-          title={<>Draw a number. <em>Watch it think.</em></>}
+          label="Interactive ML demo"
+          title={<>Draw a digit. <em>See the prediction.</em></>}
           aside="784 → 64 → 32 → 10"
         />
 
@@ -193,8 +193,9 @@ export default function Playground() {
           {/* Pad + readout */}
           <div className="lg:col-span-4">
             <p className="mb-6 max-w-md text-[1.02rem] leading-relaxed text-ink-soft">
-              A small neural network I trained on 60,000 handwritten digits. It runs right here in your browser, so all
-              ~53,000 of its weights are multiplied on your device as you draw. Nothing is sent anywhere.
+              I trained this neural network on 60,000 handwritten digits. Draw a number from 0 to 9
+              to see its prediction and how the network responds. The model runs in your browser;
+              your drawing stays on your device.
             </p>
 
             <div className="mx-auto max-w-[340px] lg:mx-0 lg:max-w-none">
@@ -211,6 +212,7 @@ export default function Playground() {
                 <canvas
                   ref={canvas}
                   aria-label="Drawing pad: draw a digit from 0 to 9"
+                  data-cursor="draw"
                   role="img"
                   onPointerDown={onDown}
                   onPointerMove={onMove}
@@ -245,7 +247,7 @@ export default function Playground() {
                       {top >= 0 ? top : '–'}
                     </motion.span>
                     <span className="font-mono text-sm text-ink-soft">
-                      {probs ? `${Math.round(probs[top] * 100)}% sure${confident ? '' : ' — keep going'}` : ''}
+                      {probs ? `${Math.round(probs[top] * 100)}% confidence${confident ? '' : ' · try a clearer digit'}` : ''}
                     </span>
                   </div>
                 </div>

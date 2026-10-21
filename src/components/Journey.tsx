@@ -81,7 +81,7 @@ export default function Journey() {
   return (
     <section id="journey" className="relative px-4 py-28 sm:px-8 md:py-40">
       <div className="mx-auto max-w-[1400px]">
-        <SectionHeader index="02" label="Experience & education" title={<>Where I&apos;ve made <em>an impact.</em></>} aside="Since 2021" />
+        <SectionHeader index="02" label="Experience & education" title={<>Where I&apos;ve worked <em>and studied.</em></>} aside="Since 2021" />
 
         <div ref={stack} className="relative">
           {journey.map((entry, i) => (
@@ -101,9 +101,9 @@ export default function Journey() {
           <div>
             <div className="eyebrow mb-2 opacity-70">Next chapter</div>
             <div className="display text-[clamp(2.2rem,4.5vw,4rem)]">
-              Let&apos;s solve <em>the next problem.</em>
+              What I&apos;m <em>looking for.</em>
             </div>
-            <p className="mt-2 opacity-75">Graduating May 2027. Open to software and AI engineering roles.</p>
+            <p className="mt-2 opacity-75">Software and AI engineering roles. Graduating from Rutgers in May 2027.</p>
           </div>
           <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-signal text-on-signal transition-transform duration-500 group-hover:rotate-45">
             <ArrowUpRight size={26} />

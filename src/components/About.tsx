@@ -65,13 +65,10 @@ function LiveClock() {
    the reading line, the way Apple's product pages read.
 ---------------------------------------------------------------- */
 const statement: Array<{ text: string; tone?: 'signal' | 'cobalt' | 'italic' }> = [
-  { text: 'A' }, { text: 'student' }, { text: 'stuck' }, { text: 'on' }, { text: 'code.' },
-  { text: 'An' }, { text: 'analyst' }, { text: 'buried' }, { text: 'in' }, { text: 'alerts.' },
-  { text: 'Those' }, { text: 'are' }, { text: 'the' }, { text: 'problems', tone: 'signal' },
-  { text: 'behind' }, { text: 'my' }, { text: 'work.' }, { text: 'I' }, { text: 'use' },
-  { text: 'machine', tone: 'cobalt' }, { text: 'learning', tone: 'cobalt' }, { text: 'and' },
-  { text: 'software', tone: 'italic' }, { text: 'engineering', tone: 'italic' },
-  { text: 'to' }, { text: 'help' }, { text: 'people' }, { text: 'move' }, { text: 'forward.' },
+  ..."I work across".split(' ').map(text => ({ text })),
+  { text: 'software', tone: 'signal' }, { text: 'engineering', tone: 'signal' },
+  { text: 'and' }, { text: 'machine', tone: 'cobalt' }, { text: 'learning.', tone: 'cobalt' },
+  ..."I like taking an idea, working through the details, and turning it into something people can use.".split(' ').map(text => ({ text })),
 ];
 
 const toneClass = { signal: 'italic text-signal', cobalt: 'italic text-cobalt', italic: 'italic' } as const;
@@ -147,7 +144,7 @@ function Portrait() {
   const onReady = useCallback(() => setReady(true), []);
   return (
     <div ref={ref} className="portrait-frame">
-      <Image src="/profile.jpeg" alt="Joy Shah" fill sizes="(max-width: 767px) 100vw, 560px" className="portrait-image" />
+      <Image src="/profile.jpeg" alt="Joy Shah" fill sizes="(max-width: 767px) calc(100vw - 32px), (max-width: 1463px) 42vw, 565px" className="portrait-image" />
       {mode === 'particles' && (
         <PortraitBoundary>
           <div className="portrait-canvas" data-ready={ready} aria-hidden="true">
@@ -181,7 +178,7 @@ export default function About() {
   return (
     <section id="about" className="relative px-4 py-28 sm:px-8 md:py-40">
       <div className="mx-auto max-w-[1400px]">
-        <SectionHeader index="01" label="About" title={<>The person behind <em>the code.</em></>} aside="Rutgers · NJ" />
+        <SectionHeader index="01" label="About" title={<>A little <em>about me.</em></>} aside="Rutgers · NJ" />
 
         <ScrollStatement />
 
@@ -193,16 +190,17 @@ export default function About() {
           <div className="flex flex-col gap-10 md:col-span-7">
             <motion.div {...reveal} transition={spring(0.05)} className="space-y-5">
               <p className="text-[1.05rem] leading-[1.8] text-ink-soft">
-                I&apos;m pursuing my Master&apos;s in Computer Science at Rutgers, graduating in May 2027.
-                As a software engineer intern at CodeBench, I develop a learning platform inside JupyterLab.
-                My work spans the React interface, Python services, and an AI tutor that helps students
-                reason through their code.
+                I&apos;m a software engineer and Computer Science master&apos;s student at Rutgers,
+                graduating in May 2027. At CodeBench, I work on a learning platform inside JupyterLab,
+                building React interfaces, Python services, and an AI tutor that guides students
+                through programming problems.
               </p>
               <p className="text-[1.05rem] leading-[1.8] text-ink-soft">
-                At Forenzy Networks, my work on web attack detection reduced false positives from 23% to 4%.
-                I&apos;ve also published computer vision research at IEEE CICT and won two hackathons.
-                I enjoy following a problem across disciplines, from understanding the data to designing
-                the API and getting the interface right.
+                Previously, I worked on machine learning for security at Forenzy Networks,
+                where I helped reduce false positives in web attack detection from 23% to 4%.
+                I&apos;ve also published research on facial liveness detection at IEEE CICT and won
+                two hackathons. I like working across the stack: understanding the data, building
+                the backend, and making the result usable in an interface.
               </p>
             </motion.div>
 

@@ -16,7 +16,7 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-const captions = ['Every project starts as noise.', 'Then it gets structure.', 'Then it ships.'];
+const captions = ['Understand the problem.', 'Build and test a solution.', 'Put it into practice.'];
 
 /** A pinned interlude: ~160k GPU-simulated particles drift on curl noise and condense into words as you scroll. */
 export default function FlowField() {
@@ -38,7 +38,7 @@ export default function FlowField() {
   if (hydrated && prefersReduced) return null;
 
   return (
-    <section ref={ref} data-surface="fixed" aria-label="Interlude" className="relative h-[500svh] bg-ink text-paper">
+    <section ref={ref} data-surface="fixed" aria-label="How I approach a project" className="relative h-[500svh] bg-ink text-paper">
       <div
         className="sticky top-0 h-[100svh] cursor-crosshair overflow-hidden"
         onPointerDown={(e) => Object.assign(flowShock, { x: e.clientX, y: e.clientY, t: 1 })}
@@ -52,7 +52,7 @@ export default function FlowField() {
 
         <div className="pointer-events-none relative mx-auto flex h-full max-w-[1400px] flex-col justify-between px-4 py-24 sm:px-8 md:py-28">
           <div className="flex items-center justify-between">
-            <span className="eyebrow text-paper/60">(✳) Interlude</span>
+            <span className="eyebrow text-paper/60">(✳) My approach</span>
             <span className="eyebrow text-paper/40">
               {flowWords.map((w, i) => (
                 <span key={w} className={`transition-colors duration-500 ${word === i ? 'text-signal' : ''}`}>

@@ -34,7 +34,7 @@ function ProjectLinks({ focusable = true }: { focusable?: boolean }) {
         onClick={(e) => { e.preventDefault(); scrollToSection('projects'); }}
         className="hero-project-link group"
       >
-        Selected work <ArrowUpRight size={18} className="transition-transform group-hover:rotate-45" />
+        View my projects <ArrowUpRight size={18} className="transition-transform group-hover:rotate-45" />
       </a>
       <a href={contact.resume} tabIndex={focusable ? 0 : -1} target="_blank" rel="noopener noreferrer" className="hero-resume-link">
         Résumé <ArrowUpRight size={14} />
@@ -52,7 +52,7 @@ function Intro({ reduced, focusable, ready }: { reduced: boolean; focusable: boo
         transition={{ duration: 0.5 }}
         className="hero-kicker"
       >
-        <span className="hero-status-dot" /> Software engineer & applied AI
+        <span className="hero-status-dot" /> Software Engineer · Applied AI
       </motion.p>
       <h1 className="hero-name" aria-label="Joy Shah">
         {['JOY', 'SHAH'].map((word, i) => (
@@ -70,7 +70,7 @@ function Intro({ reduced, focusable, ready }: { reduced: boolean; focusable: boo
         animate={{ opacity: ready ? 1 : 0, y: ready ? 0 : 16 }}
         transition={{ ...entrance, delay: 0.2 }}
       >
-        <p className="hero-tagline">A little logic. <em>A lot of possibility.</em></p>
+        <p className="hero-tagline">I build AI applications, <em>from model to interface.</em><br />M.S. Computer Science at Rutgers · Class of 2027</p>
         <ProjectLinks focusable={focusable} />
       </motion.div>
     </div>
@@ -83,14 +83,13 @@ function Beat({ p, index, active }: { p: MotionValue<number>; index: number; act
   const range = [center - 0.075, center - 0.05, center + 0.05, center + 0.075];
   const opacity = useTransform(p, range, [0, 1, 1, 0]);
   const y = useTransform(p, range, [24, 0, 0, -24]);
-  const titles = [<>Built for <em>people.</em></>, <>Powered by <em>curiosity.</em></>, <>Made to <em>protect.</em></>];
-  const details = ['Composur / Voice interview practice', 'CodeBench / AI teaching agents', 'Forenzy / Intelligent threat detection'];
+  const titles = [<>I build <em>AI applications.</em></>, <>I help students <em>understand code.</em></>, <>I apply ML <em>to security.</em></>];
 
   return (
     <motion.div aria-hidden={!active} style={{ opacity, y }} className="[grid-area:1/1]">
-      <p className="hero-kicker mb-6"><span className="text-signal">{beat.index}</span> / {beat.layer}</p>
+      <p className="hero-kicker mb-6"><span className="text-signal">{beat.index}</span> / Joy Shah · {beat.layer}</p>
       <h2 className="hero-beat-title">{titles[index]}</h2>
-      <p className="hero-beat-detail">{details[index]}</p>
+      <p className="hero-beat-detail">{beat.body}</p>
     </motion.div>
   );
 }
@@ -137,7 +136,7 @@ export default function Hero() {
       <section id="home" ref={ref} className="hero-shell hero-static">
         <div className="hero-static-art" aria-hidden="true"><span className="hero-orbit-mark" /></div>
         <Intro reduced focusable ready />
-        <div className="hero-footer"><span>Based in New Jersey</span><a href="#projects" onClick={(e) => { e.preventDefault(); scrollToSection('projects'); }}>Explore the work <ArrowDown size={14} /></a></div>
+        <div className="hero-footer"><span>Based in New Jersey</span><a href="#projects" onClick={(e) => { e.preventDefault(); scrollToSection('projects'); }}>View my projects <ArrowDown size={14} /></a></div>
       </section>
     );
   }
@@ -165,15 +164,15 @@ export default function Hero() {
             <div ref={introSlot} className="hero-art-slot" />
             {!sceneReady && <div className="hero-fallback" aria-hidden="true"><span className="hero-orbit-mark" /></div>}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: introReady ? 1 : 0 }} transition={{ delay: 0.4, duration: 0.7 }} className="hero-art-caption" aria-hidden="true">
-              <span className="hero-crosshair">+</span><span>Ideas, taking shape.</span><span className="hero-art-number">001 — ∞</span>
+              <span className="hero-crosshair">+</span><span>Software engineering · Applied AI</span><span className="hero-art-number">001 — ∞</span>
             </motion.div>
           </div>
         </motion.div>
 
         <motion.div aria-hidden={phase !== 'intro'} style={{ opacity: hintOpacity }} className="hero-footer">
-          <span>Based in New Jersey<span className="hidden sm:inline"> · Building everywhere</span></span>
+          <span>New Brunswick, NJ<span className="hidden sm:inline"> · Rutgers University</span></span>
           <a href="#about" tabIndex={phase === 'intro' ? 0 : -1} onClick={(e) => { e.preventDefault(); scrollToSection('about'); }} className="group">
-            Scroll to discover <ArrowDown size={14} className="transition-transform group-hover:translate-y-1" />
+            More about me <ArrowDown size={14} className="transition-transform group-hover:translate-y-1" />
           </a>
           <span className="hidden wide:inline">Portfolio / 2026</span>
         </motion.div>
@@ -196,10 +195,10 @@ export default function Hero() {
           className="hero-outro"
         >
           <div ref={outroSlot} className="hero-outro-slot" />
-          <h2 className="hero-outro-title">Less talk. <em>More making.</em></h2>
+          <h2 className="hero-outro-title">Explore <em>my work.</em></h2>
           <ProjectLinks focusable={phase === 'outro'} />
         </motion.div>
-        <div className="hero-edge-label" aria-hidden="true">Engineering × imagination</div>
+        <div className="hero-edge-label" aria-hidden="true">Joy Shah · Software Engineer</div>
       </div>
     </section>
   );

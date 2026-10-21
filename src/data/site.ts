@@ -47,21 +47,21 @@ export const intro = {
 export const heroBeats = [
   {
     index: '01',
-    layer: 'Products',
+    layer: 'Composur',
     title: 'Interview practice, out loud.',
-    body: 'Composur asks questions based on your résumé, follows up on your answers, and runs coding rounds in isolated Docker environments.',
+    body: 'With Composur, I combine voice, retrieval, and isolated code execution to make interview practice respond to each answer.',
   },
   {
     index: '02',
-    layer: 'Applied AI',
+    layer: 'CodeBench · Rutgers',
     title: 'A tutor inside the notebook.',
-    body: 'At CodeBench, I develop an AI teaching agent that reads student code, tests notebook cells, and guides students with questions.',
+    body: 'At Rutgers, I work on CodeBench: a tutor inside JupyterLab that reads student code, tests cells, and guides students through questions.',
   },
   {
     index: '03',
-    layer: 'Security',
+    layer: 'Forenzy Networks',
     title: 'Fewer false alarms.',
-    body: 'At Forenzy, I reduced false positives from 23% to 4% in a detection pipeline processing over 2 GB of web traffic data each day.',
+    body: 'At Forenzy, I worked on a web attack detection pipeline processing over 2 GB of data a day, helping reduce false positives from 23% to 4%.',
   },
 ];
 
@@ -109,7 +109,7 @@ export const journey: TimelineEntry[] = [
     org: 'CodeBench · Rutgers University',
     role: 'Software Engineer Intern',
     description:
-      'Developing CodeBench, a learning platform inside JupyterLab, across React interfaces, Python extensions, FastAPI services and database migrations. The AI tutor reads notebook context, edits and tests cells, and uses guided questions to help students reason through problems. Stored conversations and tool calls support replay, grading and instructor analytics.',
+      'I work across the React interface, Python extensions, FastAPI services, and database migrations for CodeBench, a learning platform inside JupyterLab. Its AI tutor uses notebook context and guided questions to help students work through code. I also work on storing conversations and tool calls for replay, grading, and instructor analytics.',
     tags: ['React', 'TypeScript', 'FastAPI', 'LLM Agents', 'Tool Calling', 'Alembic'],
   },
   {
@@ -117,7 +117,7 @@ export const journey: TimelineEntry[] = [
     period: 'Aug 2025 to May 2027',
     org: 'Rutgers University, New Brunswick',
     role: 'M.S. in Computer Science',
-    description: 'Studying machine learning, artificial intelligence and systems while applying that work at CodeBench. Current GPA: 3.75 / 4. Expected graduation: May 2027.',
+    description: 'I’m studying machine learning, artificial intelligence, and systems, and applying that work at CodeBench. GPA: 3.75 / 4.0. Expected graduation: May 2027.',
     tags: ['GPA 3.75', 'Machine Learning', 'AI', 'Systems'],
   },
   {
@@ -126,7 +126,7 @@ export const journey: TimelineEntry[] = [
     org: 'Forenzy Networks',
     role: 'Software Engineer Intern, AI/ML Security',
     description:
-      'Reduced false positives from 23% to 4% by normalizing logs in a web attack detection pipeline. Combined five BERT classifiers to reach a 97.2% F1 score while processing over 2 GB of HTTP telemetry daily. Built a monitoring dashboard that reduced security triage time by 65%.',
+      'I normalized logs in a web attack detection pipeline, reducing false positives from 23% to 4%. I combined five BERT classifiers to reach a 97.2% F1 score on a pipeline processing over 2 GB of HTTP telemetry a day, and built a monitoring dashboard that cut security triage time by 65%.',
     tags: ['BERT', 'ModSecurity', 'Nginx', 'Flask', 'Docker Compose'],
   },
   {
@@ -135,7 +135,7 @@ export const journey: TimelineEntry[] = [
     org: 'CyberNGO (Forenzy Networks)',
     role: 'Machine Learning Research Intern',
     description:
-      'Curated over 100,000 fraud records from SMS, email and WhatsApp. Developed the text preprocessing pipeline and integrated a TF IDF classifier into an analyst portal to reduce manual review.',
+      'I curated more than 100,000 fraud records from SMS, email, and WhatsApp, built a text preprocessing pipeline, and integrated a TF-IDF classifier into an analyst portal to support manual review.',
     tags: ['Python', 'NLP', 'Scikit Learn', 'Data Curation'],
   },
   {
@@ -143,7 +143,7 @@ export const journey: TimelineEntry[] = [
     period: 'Dec 2021 to Jun 2025',
     org: 'Charusat University',
     role: 'B.Tech. in Computer Science & Engineering',
-    description: 'Graduated with a 9.15 / 10 CGPA. Published research on facial liveness detection at IEEE CICT 2024.',
+    description: 'I graduated with a 9.15 / 10 CGPA and published research on facial liveness detection at IEEE CICT 2024.',
     tags: ['CGPA 9.15', 'Algorithms', 'Systems'],
   },
 ];
@@ -170,9 +170,9 @@ export const projects: Project[] = [
     id: 'composur',
     title: 'Composur',
     cover: 'Composur.',
-    subtitle: 'Interview practice that follows your answers',
+    subtitle: 'Voice-based AI interview practice',
     description:
-      'Practice interviews aloud with an AI interviewer that uses your résumé and previous answers to shape each follow up. Hybrid retrieval selects relevant questions, Gemini drives the conversation, and ElevenLabs handles speech. Coding submissions run in isolated Docker environments, with feedback guided by a weighted scoring rubric.',
+      'An AI interviewer that uses your résumé and previous answers to ask relevant follow-up questions. I bring together hybrid retrieval, Gemini, and ElevenLabs for the conversation, with isolated Docker environments for coding rounds and a weighted rubric for feedback.',
     tags: ['Gemini', 'ElevenLabs', 'pgvector', 'Hybrid Search', 'Docker'],
     links: [{ label: 'Live site', href: 'https://composur.tech' }],
   },
@@ -180,10 +180,10 @@ export const projects: Project[] = [
     id: 'cerevia',
     title: 'Cerevia',
     cover: 'Cerevia.',
-    subtitle: 'Staffing decisions for teleneurology teams',
+    subtitle: 'Scheduling support for teleneurology teams',
     award: 'Winner · Rutgers Health Hack 2026',
     description:
-      'Helps teleneurology teams spot staffing gaps and plan physician shifts around credential requirements. Each recommendation follows explicit rules that teams can inspect and audit. Winner of the Sevaro track at Rutgers Health Hack 2026.',
+      'A tool for identifying staffing gaps and planning physician shifts around credential requirements. Recommendations use explicit rules that a scheduling team can inspect. Cerevia won the Sevaro track at Rutgers Health Hack 2026.',
     tags: ['Forecasting', 'Scheduling', 'Explainable rules', 'Healthcare'],
     links: [
       { label: 'Demo', href: 'https://youtu.be/FweJcTVSq0c?si=dDUbH3iDAg5ZgDrJ' },
@@ -194,10 +194,10 @@ export const projects: Project[] = [
     id: 'planyt',
     title: 'PlaNYt',
     cover: 'PlaNYt.',
-    subtitle: 'One NYC itinerary for the whole group',
+    subtitle: 'A shared NYC trip planner',
     award: 'Winner · DivHacks 2026',
     description:
-      'Keeps a shared NYC itinerary up to date as a group changes its plans. AI agents revise the schedule while everyone stays in sync. Won MLH Best Use of Backboard at DivHacks 2026 at Columbia University.',
+      'A shared itinerary that adapts when a group changes its plans. AI agents update the schedule and keep everyone’s view in sync. PlaNYt won MLH Best Use of Backboard at DivHacks 2026 at Columbia University.',
     tags: ['LLM Agents', 'Backboard', 'Live Planning', 'Group Sync'],
     links: [
       { label: 'Live site', href: 'https://planyt.tech/' },
@@ -208,10 +208,10 @@ export const projects: Project[] = [
     id: 'liveness',
     title: 'Facial Liveness Detection',
     cover: 'Liveness.',
-    subtitle: 'Distinguishing faces from spoofing attempts',
+    subtitle: 'Computer vision research · IEEE CICT 2024',
     award: 'Published · IEEE CICT 2024',
     description:
-      'Detects photo and video replay attacks against facial authentication using YOLOv8, Dlib landmarks and a KNN classifier. Achieved 98.5% accuracy on a combined dataset of custom samples, NUAA and MSU MFSD. Published at IEEE CICT 2024.',
+      'My published research on detecting photo and video replay attacks against facial authentication. The approach combines YOLOv8, Dlib landmarks, and a KNN classifier, reaching 98.5% accuracy on a combined dataset of custom samples, NUAA, and MSU MFSD.',
     tags: ['YOLOv8', 'Dlib', 'OpenCV', 'Computer Vision'],
     links: [{ label: 'Paper', href: 'https://ieeexplore.ieee.org/document/10899685' }],
   },
@@ -219,9 +219,9 @@ export const projects: Project[] = [
     id: 'waf',
     title: 'Web Attack Detection',
     cover: 'Sentinel.',
-    subtitle: 'Web attack detection with fewer false alarms',
+    subtitle: 'BERT-based HTTP threat detection',
     description:
-      'Combines five BERT classifiers to detect attacks in HTTP traffic with a 97.2% F1 score. Processes over 2 GB of telemetry daily through Nginx and ModSecurity. A live dashboard shows attack patterns, confidence scores and explanations for each model.',
+      'A web attack detection system combining five BERT classifiers, with a 97.2% F1 score. The pipeline processes over 2 GB of daily telemetry through Nginx and ModSecurity. Its dashboard brings together attack patterns, confidence scores, and model explanations for security review.',
     tags: ['BERT', 'ModSecurity', 'Flask', 'Chart.js', 'Docker'],
     links: [{ label: 'Source', href: 'https://github.com/joyshah62/Web-Application-Firewall' }],
   },

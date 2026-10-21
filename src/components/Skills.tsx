@@ -120,18 +120,18 @@ interface DisciplineBlueprint {
 const BLUEPRINTS: Record<string, DisciplineBlueprint> = {
   ai: {
     icon: Bot,
-    headline: 'Orchestrate multi-turn AI agents',
+    headline: 'AI agents, retrieval & voice',
     highlightedPills: ['LLM Agents', 'Tool Calling', 'RAG', 'Gemini'],
     project: 'Composur · CodeBench · PlaNYt',
     projectUrl: '#projects',
-    previewTitle: 'composur.tech // interview-session',
-    previewBadge: 'VOICE + RAG LIVE',
+    previewTitle: 'Composur · Interview workflow',
+    previewBadge: 'VOICE + RETRIEVAL',
     previewMetrics: [
       { label: 'Retriever', value: 'Hybrid + Rerank' },
-      { label: 'Voice latency', value: '340 ms' },
+      { label: 'Speech', value: 'ElevenLabs' },
     ],
     command: 'agent.run({ model: "gemini-2.5", tools: [rag, sandbox] })',
-    statusLine: 'Retrieving resume context & executing tool call...',
+    statusLine: 'Example: retrieve résumé context and call a tool.',
     json: {
       session: 'composur_voice_04',
       intent: 'follow_up_probe',
@@ -140,23 +140,23 @@ const BLUEPRINTS: Record<string, DisciplineBlueprint> = {
       voice_stream: 'elevenlabs_turbo_v2',
       rubric_pass: true,
     },
-    footerCheck: '3 production agent pipelines shipped',
-    footerSub: 'Saved to telemetry: session_trace.jsonl',
+    footerCheck: 'Used in Composur, CodeBench & PlaNYt',
+    footerSub: 'Example interview session',
   },
   ml: {
     icon: BrainCircuit,
-    headline: 'Detect threats & spoofing in real time',
+    headline: 'Machine learning for security',
     highlightedPills: ['PyTorch', 'BERT', 'YOLO', 'OpenCV'],
     project: 'Forenzy WAF · IEEE CICT Liveness',
     projectUrl: '#projects',
-    previewTitle: 'forenzy.ai // ensemble-telemetry',
+    previewTitle: 'Forenzy · Threat detection',
     previewBadge: '97.2% F1 SCORE',
     previewMetrics: [
       { label: 'False positives', value: '23% → 4%' },
-      { label: 'Daily volume', value: '2.1 GB/day' },
+      { label: 'Daily volume', value: '2+ GB/day' },
     ],
     command: 'ensemble.predict({ models: 5, stream: "nginx_modsec" })',
-    statusLine: 'Running 5-BERT classifier ensemble on HTTP payload...',
+    statusLine: 'Example: classify an HTTP request with a BERT ensemble.',
     json: {
       Models: '5x_BERT_Ensemble',
       threat_class: 'SQLi_union_bypass',
@@ -165,23 +165,23 @@ const BLUEPRINTS: Record<string, DisciplineBlueprint> = {
       liveness_accuracy: '98.5%',
       triage_reduction: '-65%',
     },
-    footerCheck: '100,000+ security records classified',
-    footerSub: 'Published at: IEEE_CICT_2024.pdf',
+    footerCheck: 'BERT threat detection · 97.2% F1',
+    footerSub: 'Example classification result',
   },
   web: {
     icon: Globe,
-    headline: 'Ship full-stack interfaces & APIs',
+    headline: 'Web interfaces & backend APIs',
     highlightedPills: ['FastAPI', 'React', 'SQLAlchemy', 'JupyterLab Extensions'],
     project: 'CodeBench @ Rutgers · Composur',
     projectUrl: '#projects',
-    previewTitle: 'codebench.rutgers // jupyter-tutor',
-    previewBadge: 'EXTENSION ACTIVE',
+    previewTitle: 'CodeBench · Coding tutor',
+    previewBadge: 'JUPYTERLAB',
     previewMetrics: [
       { label: 'Notebook RPC', value: 'FastAPI + JWT' },
       { label: 'Migrations', value: 'Alembic SQL' },
     ],
     command: 'fastapi.post("/v1/notebook/cell-assist", { cell_id: 14 })',
-    statusLine: 'Inspecting active JupyterLab AST & running unit checks...',
+    statusLine: 'Example: read notebook context and check student code.',
     json: {
       service: 'codebench_api_v2',
       extension: '@codebench/jupyter-tutor',
@@ -190,23 +190,23 @@ const BLUEPRINTS: Record<string, DisciplineBlueprint> = {
       guided_hint: 'Check base case on line 12',
       status: '200_OK',
     },
-    footerCheck: 'End-to-end React + FastAPI architecture',
-    footerSub: 'Synced to state: notebook_replay.db',
+    footerCheck: 'React interfaces and FastAPI services',
+    footerSub: 'Example notebook response',
   },
   databases: {
     icon: Database,
-    headline: 'Index vectors & relational state',
+    headline: 'Search & application data',
     highlightedPills: ['PostgreSQL', 'pgvector', 'MongoDB'],
     project: 'Composur Hybrid Search · CodeBench',
     projectUrl: '#projects',
-    previewTitle: 'pgvector // hybrid-ann-index',
+    previewTitle: 'Composur · Hybrid search',
     previewBadge: 'HNSW + BM25',
     previewMetrics: [
       { label: 'Index type', value: 'HNSW Cosine' },
-      { label: 'Query p95', value: '11.4 ms' },
+      { label: 'Search', value: 'Vector + lexical' },
     ],
     command: 'db.query("SELECT * FROM chunks ORDER BY emb <=> $1 LIMIT 6")',
-    statusLine: 'Fusing dense pgvector cosine similarity with lexical BM25...',
+    statusLine: 'Example: combine vector and keyword search results.',
     json: {
       engine: 'postgresql_16_pgvector',
       dimensions: 1536,
@@ -215,23 +215,23 @@ const BLUEPRINTS: Record<string, DisciplineBlueprint> = {
       replayed_turns: 1420,
       acid_compliant: true,
     },
-    footerCheck: 'Sub-15ms hybrid vector + relational queries',
-    footerSub: 'Indexed in cluster: prod_vectors.sql',
+    footerCheck: 'Vector search with PostgreSQL & pgvector',
+    footerSub: 'Example retrieval result',
   },
   cloud: {
     icon: Cloud,
-    headline: 'Isolate & scale container workloads',
+    headline: 'Containers & deployment',
     highlightedPills: ['Docker', 'AWS (S3)', 'Nginx', 'Linux'],
     project: 'Composur Sandboxes · Forenzy Pipeline',
     projectUrl: '#projects',
-    previewTitle: 'docker // sandbox-runner-pool',
+    previewTitle: 'Composur · Code execution',
     previewBadge: 'ISOLATED EXEC',
     previewMetrics: [
       { label: 'Gateway', value: 'Nginx + ModSec' },
       { label: 'Storage', value: 'AWS S3 Buckets' },
     ],
     command: 'docker.run({ image: "sandbox:py312", net: "none", cpu: 0.5 })',
-    statusLine: 'Spinning ephemeral container & streaming stdout logs...',
+    statusLine: 'Example: run code in an isolated container.',
     json: {
       runtime: 'docker_isolated_sandbox',
       reverse_proxy: 'nginx_modsecurity',
@@ -240,23 +240,23 @@ const BLUEPRINTS: Record<string, DisciplineBlueprint> = {
       network_policy: 'airgapped',
       exit_code: 0,
     },
-    footerCheck: 'Zero-trust sandboxed code execution',
-    footerSub: 'Archived to bucket: s3_telemetry.tar.gz',
+    footerCheck: 'Isolated Docker environments for code execution',
+    footerSub: 'Example execution result',
   },
   languages: {
     icon: Code2,
-    headline: 'Write type-safe systems & ML code',
+    headline: 'Python, TypeScript & SQL',
     highlightedPills: ['Python', 'TypeScript', 'SQL'],
-    project: 'Across all 5 production systems',
+    project: 'Composur · CodeBench',
     projectUrl: '#projects',
-    previewTitle: 'runtime // polyglot-typecheck',
+    previewTitle: 'Python & TypeScript · Data contracts',
     previewBadge: 'STRICT MODE',
     previewMetrics: [
       { label: 'Backend / ML', value: 'Python 3.12' },
       { label: 'Frontend / UI', value: 'TypeScript 5' },
     ],
     command: 'pipeline.compile({ py: "3.12", ts: "strict", sql: "pg16" })',
-    statusLine: 'Validating Pydantic schemas against TypeScript client types...',
+    statusLine: 'Example: check Python and TypeScript data contracts.',
     json: {
       primary_ml: 'Python (PyTorch, FastAPI)',
       primary_ui: 'TypeScript (React, Next.js)',
@@ -264,8 +264,8 @@ const BLUEPRINTS: Record<string, DisciplineBlueprint> = {
       type_coverage: '100%',
       lint_errors: 0,
     },
-    footerCheck: '4 core languages across AI, web & data',
-    footerSub: 'Verified build: schema_contracts.d.ts',
+    footerCheck: 'Python for AI & APIs · TypeScript for web',
+    footerSub: 'Example contract check',
   },
 };
 
@@ -370,7 +370,7 @@ export default function Skills() {
           label="Skills"
           title={
             <>
-              A stack of <em>possibilities.</em>
+              The tools <em>I work with.</em>
             </>
           }
           aside={`${COUNT} disciplines · ${TOTAL_TOOLS} tools`}
@@ -457,8 +457,8 @@ export default function Skills() {
           {/* ---------------- LEFT STAGE: ECOSYSTEM LOGO GRID + ORTHOGONAL WIRES ---------------- */}
           <div className={styles.leftStage}>
             <div className={styles.stageLabel}>
-              <span>INPUT // ALL {TOTAL_TOOLS} TOOLS</span>
-              <span>{activeTiles.length} ROUTED</span>
+              <span>MY TOOLKIT // {TOTAL_TOOLS} TOOLS</span>
+              <span>{activeTiles.length} SELECTED</span>
             </div>
 
             <div className={styles.gridCanvas}>
@@ -685,13 +685,13 @@ export default function Skills() {
 
                     <h3 className={styles.hubTitle}>{blueprint.headline}</h3>
 
-                    <span className={styles.hubToolCount}>{category.skills.length} tools · explore below</span>
+                    <span className={styles.hubToolCount}>{category.skills.length} tools in this area</span>
                   </motion.div>
                 </AnimatePresence>
               </div>
             </div>
             <div className={styles.toolShelf}>
-              <span className={styles.toolShelfLabel}>{category.label} toolkit</span>
+              <span className={styles.toolShelfLabel}>{category.label} tools</span>
                     {/* Tools stay outside the circular hub so every label has room. */}
                     <motion.div
                       key={category.id}
@@ -839,8 +839,8 @@ export default function Skills() {
                     </div>
                     <span className={styles.windowTitle}>
                       {focusedSkill
-                        ? `node // ${focusedSkill.toLowerCase().replace(/\s+/g, '_')}.ts`
-                        : `pipeline // ${category.id}_output.json`}
+                        ? `Example · ${focusedSkill}`
+                        : `Example output · ${category.label}`}
                     </span>
                   </div>
 
@@ -853,7 +853,7 @@ export default function Skills() {
                       <span className={styles.statusBlip} style={{ background: category.color }} />
                       <Typewriter
                         key={focusedSkill ?? category.id}
-                        text={focusedSkill ? `Inspecting ${focusedSkill} integration...` : blueprint.statusLine}
+                        text={focusedSkill ? `Example integration: ${focusedSkill}` : blueprint.statusLine}
                         instant={reducedMotion}
                       />
                     </div>

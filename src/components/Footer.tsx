@@ -2,12 +2,11 @@
 
 import { useRef, useSyncExternalStore } from 'react';
 import { ArrowUp } from 'lucide-react';
-import { intro, navLinks } from '@/data/site';
+import { navLinks } from '@/data/site';
 import { scrollToSection } from '@/utils/scroll';
 
 const ZONE = 'America/New_York';
 const clockFormat = new Intl.DateTimeFormat('en-US', { timeZone: ZONE, hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-const hourFormat = new Intl.DateTimeFormat('en-US', { timeZone: ZONE, hour: 'numeric', hourCycle: 'h23' });
 
 // Ticks every 15 s; strings compare by value, so React only re-renders when the minute changes
 const subscribeClock = (onChange: () => void) => {
@@ -16,14 +15,13 @@ const subscribeClock = (onChange: () => void) => {
 };
 const clockSnapshot = () => {
   const now = new Date();
-  return `${clockFormat.format(now)}|${hourFormat.format(now)}`;
+  return clockFormat.format(now);
 };
 
 export default function Footer() {
   const mark = useRef<HTMLDivElement>(null);
   const clock = useSyncExternalStore(subscribeClock, clockSnapshot, () => '');
-  const [time, hour] = clock.split('|');
-  const now = hour ? [...intro.rightNow].reverse().find((r) => Number(hour) >= r.from)?.text : null;
+  const time = clock;
 
   const go = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -47,15 +45,15 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-12">
           <div className="col-span-2 md:col-span-5">
             <p className="max-w-sm font-serif text-[clamp(1.6rem,2.6vw,2.2rem)] leading-tight text-paper/85">
-              Software engineer building <em className="text-signal">applied AI</em> that ships.
+              I&apos;m Joy, a software engineer working on <em className="text-signal">AI applications.</em>
             </p>
             <p className="mt-6 inline-flex items-center gap-2.5 rounded-full border border-paper/15 px-4 py-2 text-sm text-paper/70">
-              <span className="hero-status-dot animate-pulse" /> Open to roles from May 2027
+              <span className="hero-status-dot animate-pulse" /> Graduating May 2027 · Open to roles
             </p>
           </div>
 
           <nav aria-label="Footer" className="md:col-span-3">
-            <p className="eyebrow mb-5 text-paper/40">Index</p>
+            <p className="eyebrow mb-5 text-paper/40">Explore</p>
             <ul className="space-y-2.5">
               {navLinks.map((l, i) => (
                 <li key={l.href}>
@@ -69,9 +67,9 @@ export default function Footer() {
           </nav>
 
           <div className="md:col-span-4">
-            <p className="eyebrow mb-5 text-paper/40">Right now in New Brunswick</p>
+            <p className="eyebrow mb-5 text-paper/40">Local time · New Brunswick</p>
             <p className="font-serif text-[clamp(2rem,3.4vw,2.8rem)] leading-none tabular-nums">{time || '—'}</p>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-paper/55">{now ? now[0].toUpperCase() + now.slice(1) :' '}</p>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-paper/55">M.S. Computer Science at Rutgers. Interested in software and AI engineering opportunities.</p>
           </div>
         </div>
 

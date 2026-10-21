@@ -90,8 +90,13 @@ function ProjectCard({ project, index, wide, focus }: { project: Project; index:
         className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-line bg-card"
       >
         {/* Cover */}
-        <div
-          className={`relative overflow-hidden ${wide ? 'aspect-[2/1]' : 'aspect-[16/10]'}`}
+        <a
+          href={primary?.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`View ${project.title}`}
+          data-cursor="view"
+          className={`block relative overflow-hidden ${wide ? 'aspect-[2/1]' : 'aspect-[16/10]'}`}
           style={{ background: cover.bg, color: cover.fg }}
         >
           <div
@@ -112,7 +117,7 @@ function ProjectCard({ project, index, wide, focus }: { project: Project; index:
               {project.cover}
             </div>
           </div>
-        </div>
+        </a>
 
         {/* Body */}
         <div className="flex flex-1 flex-col p-5 sm:p-8">
@@ -264,8 +269,8 @@ export default function Projects() {
       <div className="mx-auto max-w-[1400px] px-4 sm:px-8">
         <SectionHeader
           index="03"
-          label="Selected work"
-          title={<>A closer look <em>at the work.</em></>}
+          label="Projects"
+          title={<>What I&apos;ve <em>been building.</em></>}
           aside={`${projects.length} projects`}
         />
       </div>

@@ -39,9 +39,9 @@ export default function LoadingIntro({ ready, onReveal }: { ready: boolean; onRe
           <div className="loading-topline"><span>Joy Shah</span><span>Portfolio / 2026</span></div>
           <motion.div className="loading-center" exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.3 }}>
             <div className="loading-symbol"><span /><span /><span /><span /></div>
-            <span className="loading-label">Putting things in motion</span>
+            <span className="loading-label">Loading my portfolio</span>
           </motion.div>
-          <div className="loading-bottomline"><span>Logic meets possibility.</span><span className="loading-dots"><i /><i /><i /></span></div>
+          <div className="loading-bottomline"><span>Software engineering · Applied AI</span><span className="loading-dots"><i /><i /><i /></span></div>
           <div className="loading-track"><span /></div>
         </motion.div>
       )}
