@@ -1,0 +1,1184 @@
+@font-face {
+  font-family: 'Skills Inter';
+  src: url('/fonts/Inter-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================
+   TOP DISCIPLINE SELECTOR BAR
+============================================================ */
+.navBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  font-family: 'Skills Inter', system-ui, sans-serif;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.pills button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.52rem 0.9rem;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-card) 86%, transparent);
+  backdrop-filter: blur(10px);
+  font-size: 0.76rem;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 100ms ease;
+}
+
+.pills button:hover {
+  color: var(--color-ink);
+  border-color: var(--color-muted);
+}
+
+.pills button:active {
+  transform: scale(0.97);
+}
+
+.pills button i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pillIndex {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  opacity: 0.68;
+  letter-spacing: 0.04em;
+}
+
+.pillCount {
+  padding: 0.08rem 0.42rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1.2;
+}
+
+.stepControls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.stepControls button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: var(--color-card);
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition: border-color 180ms, color 180ms, transform 100ms;
+}
+
+.stepControls button:hover {
+  color: var(--color-ink);
+  border-color: var(--color-signal);
+}
+
+/* Auto-cycle toggle with a countdown ring that refills on every discipline change */
+.autoBtn {
+  position: relative;
+  overflow: visible;
+}
+
+.autoBtnOn {
+  color: var(--color-ink);
+  border-color: color-mix(in srgb, var(--accent, var(--color-signal)) 55%, var(--color-line));
+}
+
+.autoRing {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(var(--accent, var(--color-signal)) var(--p, 0%), transparent 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+  animation: autoRingFill linear forwards;
+}
+
+@property --p {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+@keyframes autoRingFill {
+  from { --p: 0%; }
+  to   { --p: 100%; }
+}
+
+/* ============================================================
+   THREE-STAGE ARCHITECTURAL PIPELINE DIAGRAM
+============================================================ */
+.diagramFrame {
+  /* Surface-aware tokens: light mode needs harder lines and a brighter raised tile to read */
+  --grid-line: color-mix(in srgb, var(--color-line) 75%, transparent);
+  --tile-raised: var(--color-paper);
+  --tile-shadow: rgb(0 0 0 / 0.45);
+  --ring-fill: color-mix(in srgb, var(--color-paper-2) 88%, var(--color-card));
+  --ring-stroke: var(--color-line);
+  --wire-ink: color-mix(in srgb, var(--color-ink) 28%, transparent);
+  --tile-idle-opacity: 0.62;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(270px, 0.92fr) minmax(420px, 1.24fr) minmax(300px, 1.02fr);
+  align-items: center;
+  gap: 0;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem);
+  border: 1px solid var(--color-line);
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      circle at 48% 50%,
+      color-mix(in srgb, var(--accent, #ff4f1f) 9%, transparent),
+      transparent 60%
+    ),
+    var(--color-card);
+  overflow: hidden;
+  font-family: 'Skills Inter', system-ui, sans-serif;
+  transition: background 350ms ease;
+}
+
+:global([data-theme='light']) .diagramFrame {
+  --grid-line: color-mix(in srgb, var(--color-ink) 14%, transparent);
+  --tile-raised: #fffdf8;
+  --tile-shadow: rgb(20 18 16 / 0.18);
+  --ring-fill: color-mix(in srgb, var(--color-ink) 7%, var(--color-card));
+  --ring-stroke: color-mix(in srgb, var(--color-ink) 22%, transparent);
+  --wire-ink: color-mix(in srgb, var(--color-ink) 42%, transparent);
+  --tile-idle-opacity: 0.82;
+  background:
+    radial-gradient(
+      circle at 48% 50%,
+      color-mix(in srgb, var(--accent, #ff4f1f) 12%, transparent),
+      transparent 60%
+    ),
+    var(--color-card);
+}
+
+/* ============================================================
+   STAGE 1 (LEFT): TOOL ECOSYSTEM GRID + ORTHOGONAL CIRCUIT WIRES
+============================================================ */
+.leftStage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  height: 512px;
+}
+
+.stageLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 2.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.gridCanvas {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* 5 columns × 8 rows architectural blueprint cells (occupying the left 78% of the stage, leaving 22% for the orthogonal wire bus) */
+.cellMatrix {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 77.78%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  border-top: 1px solid var(--grid-line);
+  border-left: 1px solid var(--grid-line);
+  pointer-events: none;
+}
+
+.emptyCell {
+  border-right: 1px solid var(--grid-line);
+  border-bottom: 1px solid var(--grid-line);
+}
+
+/* Placed Tool Logo Tiles */
+.logoTile {
+  position: absolute;
+  width: calc(77.78% / 5);
+  height: calc(100% / 8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.18rem;
+  padding: 0.25rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-ink-soft);
+  opacity: var(--tile-idle-opacity);
+  cursor: pointer;
+  z-index: 2;
+  transition:
+    opacity 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+/* Tiny category-colour tick in the top-left corner of every tile, so the grid reads as 6 colour-coded blocks */
+.logoTile::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--tile-color, var(--color-muted));
+  opacity: 0.7;
+}
+
+.logoTile:hover {
+  opacity: 1;
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-paper) 65%, var(--color-card));
+}
+
+.logoTileActive {
+  opacity: 1;
+  z-index: 4;
+  color: var(--color-ink);
+  background: var(--tile-raised);
+  border: 1px solid color-mix(in srgb, var(--tile-color, var(--color-signal)) 65%, var(--color-line));
+  border-radius: 6px;
+  box-shadow:
+    0 10px 24px -10px var(--tile-shadow),
+    0 0 0 1px color-mix(in srgb, var(--tile-color, var(--color-signal)) 22%, transparent);
+  /* Staggered pop-in, replayed on every discipline switch via a per-category key */
+  animation: tilePop 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@keyframes tilePop {
+  from { opacity: 0.3; transform: translateY(6px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.logoTileFocused {
+  transform: scale(1.06);
+  border-color: var(--tile-color, var(--color-signal));
+  box-shadow:
+    0 12px 28px -8px color-mix(in srgb, var(--tile-color, var(--color-signal)) 45%, transparent);
+}
+
+.tileIcon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+}
+
+.tileIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tileCaption {
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.78;
+}
+
+/* Signature Diamond Connector Node on the Right Edge of Active Tiles */
+.diamondPort {
+  position: absolute;
+  right: -4.5px;
+  top: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  border-radius: 1.5px;
+  box-shadow: 0 0 8px currentColor;
+  pointer-events: none;
+}
+
+/* SVG Orthogonal Circuit Traces */
+.leftWires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.wireBus {
+  fill: none;
+  stroke: var(--wire-ink);
+  stroke-width: 1.35;
+  vector-effect: non-scaling-stroke;
+}
+
+.wireArrow {
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Marching dash that reads as data flowing toward the wheel / out to the inspector */
+.wireFlow {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 6 10;
+  vector-effect: non-scaling-stroke;
+  animation: wireFlow 1.1s linear infinite;
+}
+
+@keyframes wireFlow {
+  to { stroke-dashoffset: -16; }
+}
+
+.wireLine {
+  fill: none;
+  stroke-width: 1.4;
+  stroke-opacity: 0.78;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: wireDraw 520ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: stroke-opacity 200ms ease, stroke-width 200ms ease;
+}
+
+@keyframes wireDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+.wireLineFocused {
+  stroke-width: 2.2;
+  stroke-opacity: 1;
+}
+
+.wireNode {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nodePop 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes nodePop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* ============================================================
+   STAGE 2 (CENTER): SEGMENTED RING + INNER HUB
+============================================================ */
+.centerStage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0.25rem;
+}
+
+.wheelContainer {
+  position: relative;
+  width: min(100%, 490px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.ringSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.compassHairline {
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-ink) 18%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+}
+
+.compassSpin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: compassSpin 60s linear infinite;
+}
+
+@keyframes compassSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Thin accent arc hugging the active segment; draws in from one end on each switch */
+.activeArc {
+  stroke: none;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent, #ff4f1f) 70%, transparent));
+  animation: arcReveal 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes arcReveal {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 0.95; transform: scale(1); }
+}
+
+
+
+.ringSegment {
+  cursor: pointer;
+  outline: none;
+}
+
+.ringSegment > path {
+  fill: var(--ring-fill);
+  stroke: var(--ring-stroke);
+  stroke-width: 1.2;
+  transition:
+    fill 220ms ease,
+    stroke 220ms ease,
+    filter 220ms ease;
+}
+
+.ringSegment:hover > path {
+  fill: color-mix(in srgb, var(--color-ink) 12%, var(--color-paper-2));
+  stroke: var(--color-muted);
+}
+
+.ringSegmentActive > path {
+  filter: drop-shadow(0 6px 20px color-mix(in srgb, var(--accent, #ff4f1f) 38%, transparent));
+}
+
+.ringSegment:focus-visible > path {
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+
+.segmentIconWrap {
+  pointer-events: none;
+}
+
+.segmentIcon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--color-ink-soft);
+  transition: color 200ms ease, transform 200ms ease;
+}
+
+/* Inner Hub Content inside the Ring */
+.wheelHub {
+  position: absolute;
+  inset: 19.5%;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 50% 24%,
+      color-mix(in srgb, var(--accent, #ff4f1f) 10%, transparent),
+      transparent 68%
+    ),
+    var(--color-paper);
+  border: 1px solid var(--color-line);
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 2.2vw, 1.65rem);
+  text-align: center;
+  box-shadow: inset 0 1px 0 0 var(--glass-highlight);
+}
+
+.wheelHubInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 0.45rem;
+}
+
+.hubBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--accent, #ff4f1f) 65%, transparent);
+  margin-bottom: 0.1rem;
+}
+
+.hubKicker {
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.hubTitle {
+  font-size: clamp(0.95rem, 1.35vw, 1.16rem);
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.025em;
+  color: var(--color-ink);
+  max-width: 22ch;
+  margin-bottom: 0.25rem;
+}
+
+/* 2-Column Monospace Pill Matrix inside the Wheel */
+.hubPillGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.32rem 0.45rem;
+  width: 100%;
+  max-width: 256px;
+}
+
+.hubPill {
+  padding: 0.26rem 0.42rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 120ms ease;
+}
+
+.hubPill:hover {
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+
+.hubPillHighlighted {
+  font-weight: 600;
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--accent, #ff4f1f) 55%, transparent);
+}
+
+/* ============================================================
+   STAGE 3 (RIGHT): ARCHITECTURAL PREVIEW + LIVE CODE/JSON WINDOW
+============================================================ */
+.rightStage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 3.1rem;
+  min-height: 512px;
+}
+
+.rightWires {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.1rem;
+  height: 100%;
+  pointer-events: none;
+}
+
+.rightStack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Top Window: Wireframe Architecture Card */
+.previewWindow {
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: var(--color-paper);
+  overflow: hidden;
+  box-shadow: 0 12px 28px -18px rgb(0 0 0 / 0.4);
+}
+
+.windowChrome {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid var(--color-line);
+  background: color-mix(in srgb, var(--color-card) 70%, var(--color-paper));
+}
+
+.windowDots,
+.windowDotsColored {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.windowDots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--color-muted);
+  opacity: 0.6;
+}
+
+.windowDotsColored span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.windowTitle {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.windowBadge {
+  margin-left: auto;
+  padding: 0.12rem 0.42rem;
+  border: 1px solid;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.previewBody {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 0.85rem;
+  padding: 0.9rem;
+}
+
+.wireframeAvatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.4rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-ink) 5%, var(--color-card));
+  border: 1px solid color-mix(in srgb, var(--color-line) 70%, transparent);
+}
+
+.wireframeMiniBars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  width: 80%;
+}
+
+.wireframeMiniBars span {
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--color-ink) 14%, transparent);
+}
+
+.wireframeMiniBars span:last-child {
+  width: 65%;
+}
+
+.wireframeContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.wireframeHeaderBar {
+  height: 12px;
+  width: 72%;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+
+.metricRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.metricCell {
+  padding: 0.38rem 0.55rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-card) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-line) 80%, transparent);
+}
+
+.metricCell small {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+
+.metricCell strong {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.wireframeSubBars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wireframeSubBars span {
+  height: 6px;
+  width: var(--w, 84%);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  transform-origin: left;
+  animation: barGrow 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wireframeSubBars span:last-child {
+  animation-delay: 90ms;
+}
+
+@keyframes barGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Vertical Connector Arrow between Top Preview & Bottom Code Window */
+.verticalConnector {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 28px;
+}
+
+.verticalLine {
+  width: 1.5px;
+  flex: 1;
+  background: color-mix(in srgb, var(--color-ink) 28%, transparent);
+}
+
+.verticalChevron {
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid color-mix(in srgb, var(--color-ink) 45%, transparent);
+  border-bottom: 1.5px solid color-mix(in srgb, var(--color-ink) 45%, transparent);
+  transform: rotate(45deg);
+  margin-top: -5px;
+  margin-bottom: 2px;
+}
+
+/* Bottom Window: Code & Structured JSON Output */
+.codeWindow {
+  border: 1.5px solid var(--color-signal);
+  border-radius: 12px;
+  background: var(--color-paper);
+  overflow: hidden;
+  box-shadow:
+    0 18px 40px -22px rgb(0 0 0 / 0.55),
+    0 0 0 1px color-mix(in srgb, var(--accent, #ff4f1f) 15%, transparent);
+}
+
+.codeBody {
+  padding: 0.9rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  line-height: 1.55;
+}
+
+.codeCommand {
+  color: var(--color-ink);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.codeStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.4em;
+  font-size: 0.6rem;
+  margin-top: 0.15rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-line) 75%, transparent);
+}
+
+.statusBlip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+  animation: blip 1.2s ease-in-out infinite;
+}
+
+@keyframes blip {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.75); }
+}
+
+.caret {
+  display: inline-block;
+  margin-left: 1px;
+  animation: caretBlink 0.8s steps(1) infinite;
+}
+
+@keyframes caretBlink {
+  50% { opacity: 0; }
+}
+
+.jsonBlock {
+  margin: 0.55rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  line-height: 1.52;
+  color: var(--color-ink-soft);
+  overflow-x: auto;
+}
+
+.jsonRow {
+  padding-left: 0.85rem;
+  animation: rowIn 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.jsonKey {
+  color: var(--color-cobalt);
+}
+
+.jsonVal {
+  padding: 0.05rem 0.35rem;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent, #ff4f1f) 12%, transparent);
+  color: var(--color-ink);
+}
+
+.jsonHighlight {
+  font-weight: 600;
+}
+
+.codeFooter {
+  padding-top: 0.55rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-line) 75%, transparent);
+}
+
+.codeCheck {
+  font-size: 0.62rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.codeSavedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.18rem;
+  font-size: 0.58rem;
+  color: var(--color-muted);
+}
+
+.seeWorkLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--color-ink);
+  font-weight: 500;
+  transition: color 160ms ease;
+}
+
+.seeWorkLink:hover {
+  color: var(--color-signal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logoTileActive,
+  .wireLine,
+  .wireFlow,
+  .wireNode,
+  .compassSpin,
+  .activeArc,
+  .wireframeSubBars span,
+  .statusBlip,
+  .caret,
+  .jsonRow,
+  .autoRing {
+    animation: none;
+  }
+  .wireLine { stroke-dashoffset: 0; }
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS
+============================================================ */
+@media (max-width: 1180px) {
+  .diagramFrame {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .leftStage {
+    display: none;
+  }
+
+  .rightStage {
+    padding-left: 0;
+    min-height: auto;
+  }
+
+  .rightWires {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+  }
+
+  .pills button {
+    flex: none;
+  }
+
+  .stepControls {
+    display: none;
+  }
+
+  .diagramFrame {
+    padding: 1rem;
+    border-radius: 22px;
+  }
+
+  .wheelHub {
+    inset: 18%;
+    padding: 0.85rem;
+  }
+
+  .hubBadge {
+    width: 32px;
+    height: 32px;
+  }
+
+  .hubTitle {
+    font-size: 0.86rem;
+  }
+
+  .hubPill {
+    font-size: 0.48rem;
+    padding: 0.2rem 0.3rem;
+  }
+}
+
+/* ============================================================
+   LEGACY SVG WHEEL CLASSES (kept for SkillsWheel.tsx compatibility)
+============================================================ */
+.wheel {
+  width: min(100%, 560px);
+  height: auto;
+}
+.hub { fill: var(--color-card); stroke: var(--color-line); }
+.hubIndex { fill: var(--color-ink); font-size: 46px; text-anchor: middle; }
+.hubCount { fill: var(--color-muted); font-size: 11px; text-anchor: middle; }
+.segment { cursor: pointer; }
+.segment path { fill: var(--color-card); stroke: var(--color-line); }
+.segmentIndex { font-size: 10px; }
+.segmentLabel { font-size: 19px; font-weight: 600; }
+.pointer path { fill: currentColor; }
+.skills { opacity: 0.5; }
+.skillsHovered { opacity: 0.85; }
+.skillsActive { opacity: 1; }
+
+/* Keep text contrast separate from the brighter decorative domain colors. */
+.skillsSection { --color-muted: #b2b5aa; }
+:global([data-theme='light']) .skillsSection {
+  --color-muted: #575147;
+  --color-line: rgb(20 18 16 / 0.24);
+}
+.diagramFrame { --accent-ink: color-mix(in srgb, var(--accent) 62%, #fffaf3); min-width: 0; }
+:global([data-theme='light']) .diagramFrame {
+  --accent-ink: color-mix(in srgb, var(--accent) 64%, #141210);
+  --tile-idle-opacity: 1;
+}
+.tileCaption { opacity: 1; }
+:global([data-theme='light']) .tileIcon { color: #353129; }
+.skillsSection button:focus-visible, .ringSegment:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+.rightStack, .rightStage { min-width: 0; }
+.previewMetrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0 0.9rem 0.9rem; }
+.workflow { padding: 0.9rem; }
+.workflowHeading { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; color: var(--color-ink); font-size: 0.72rem; font-weight: 600; }
+.workflowHeading span:last-child { color: var(--color-muted); font: 0.5rem var(--font-mono); letter-spacing: 0.06em; }
+.workflowMap { width: 100%; height: 86px; margin: 0.4rem 0; }
+.workflowSteps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.35rem; }
+.workflowSteps button { border: 1px solid var(--color-line); border-radius: 5px; padding: 0.45rem 0.2rem; color: var(--color-ink-soft); font-size: 0.65rem; cursor: pointer; transition: background 160ms, border-color 160ms; }
+.workflowSteps button[aria-pressed='true'] { background: color-mix(in srgb, var(--accent) 12%, var(--color-card)); border-color: var(--accent-ink); color: var(--accent-ink); font-weight: 600; }
+.workflowDetail { min-height: 3em; margin: 0.65rem 0; color: var(--color-ink-soft); font-size: 0.72rem; line-height: 1.5; }
+.workflowNext { display: flex; align-items: center; gap: 0.4rem; color: var(--accent-ink); font-size: 0.68rem; font-weight: 600; min-height: 32px; cursor: pointer; }
+@media (max-width: 700px) {
+  .navBar { flex-wrap: wrap; }
+  .pills { width: 100%; }
+  .stepControls { display: flex; margin-left: auto; }
+}
+
+/* The hub is a summary; the rectangular shelf gives every tool a readable target. */
+.centerStage { gap: 0.75rem; min-width: 0; }
+.wheelContainer { container-type: inline-size; }
+.wheelHub { padding: 8%; }
+.wheelHubInner { gap: 0.55rem; min-width: 0; }
+.hubToolCount { color: var(--color-muted); font: 0.62rem var(--font-mono); }
+.toolShelf { width: min(100%, 390px); padding: 0.85rem; border: 1px solid var(--color-line); border-radius: 12px; background: var(--color-paper); }
+.toolShelfLabel { display: block; margin-bottom: 0.65rem; color: var(--color-muted); font: 0.62rem var(--font-mono); }
+.toolShelf .hubPillGrid { max-width: none; gap: 0.4rem; }
+.toolShelf .hubPill { min-height: 36px; white-space: normal; overflow: visible; font-size: 0.65rem; line-height: 1.35; letter-spacing: 0.02em; padding: 0.4rem; border-color: var(--color-line); }
+.toolShelf .hubPillHighlighted { box-shadow: none; }
+.segmentIcon { color: var(--color-ink); }
+@container (max-width: 330px) {
+  .hubBadge { width: 28px; height: 28px; }
+  .hubTitle { font-size: 0.78rem; margin: 0; }
+  .hubKicker { font-size: 0.46rem; letter-spacing: 0.06em; }
+  .hubToolCount { font-size: 0.48rem; }
+  .wheelHubInner { gap: 0.3rem; }
+}
+
+.workflowMap { height: auto; aspect-ratio: 300 / 148; overflow: visible; }
+.diagramCaption { color: var(--color-muted); font: 0.6rem/1.5 var(--font-mono); margin: 0 0 0.8rem; text-align: center; }
+
+/* Keep the desktop explorer within one screen without scaling its text. */
+@media (min-width: 1024px) {
+  .skillsSection { scroll-margin-top: 5rem; }
+  .skillsSection > div > div:first-child { margin-bottom: 1.25rem; }
+  .skillsSection h2 { font-size: clamp(2.6rem, 4vw, 3.75rem); margin-top: 1rem; }
+  .navBar { margin-bottom: 0.8rem; }
+  .diagramFrame {
+    grid-template-columns: minmax(210px, 0.88fr) minmax(280px, 1.12fr) minmax(320px, 1.2fr);
+    gap: 0;
+    padding: 1rem;
+    border-radius: 20px;
+  }
+  .leftStage { display: flex; height: 390px; gap: 0.45rem; }
+  .centerStage { gap: 0.5rem; }
+  .wheelContainer { width: min(100%, 300px); }
+  .toolShelf { width: 100%; padding: 0.6rem; }
+  .toolShelfLabel { margin-bottom: 0.4rem; }
+  .toolShelf .hubPillGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.25rem; }
+  .toolShelf .hubPill { min-height: 29px; font-size: 0.625rem; padding: 0.3rem 0.2rem; }
+  .rightStage { min-height: 0; padding-left: 1.6rem; }
+  .rightWires { display: block; width: 1.6rem; }
+  .workflow { padding: 0.6rem 0.75rem 0.35rem; }
+  .workflowMap { height: 110px; aspect-ratio: auto; margin: 0.15rem 0; }
+  .diagramCaption { margin-bottom: 0.4rem; font-size: 0.625rem; }
+  .workflowSteps button { padding: 0.3rem 0.2rem; }
+  .workflowDetail { min-height: 2.7em; margin: 0.35rem 0; font-size: 0.65rem; line-height: 1.35; }
+  .workflowNext { min-height: 24px; font-size: 0.62rem; }
+  .previewMetrics { padding: 0.25rem 0.75rem 0.6rem; gap: 0.35rem; }
+  .metricCell { padding: 0.25rem 0.4rem; }
+  .metricCell strong { font-size: 0.6rem; }
+  .windowChrome { padding: 0.4rem 0.6rem; gap: 0.35rem; }
+  .verticalConnector { height: 16px; }
+  .codeBody { padding: 0.55rem 0.7rem; font-size: 0.6rem; line-height: 1.35; }
+  .codeStatus { padding-bottom: 0.35rem; font-size: 0.625rem; }
+  .jsonBlock { font-size: 0.625rem; line-height: 1.35; margin: 0.35rem 0; }
+  .codeFooter { padding-top: 0.35rem; }
+  .codeCheck, .codeSavedRow { font-size: 0.625rem; }
+  .codeSavedRow { flex-wrap: wrap; gap: 0.2rem; }
+}
+
+/* SVG connectors keep their geometry instead of stretching to the panel height. */
+.rightWires {
+  top: 125px;
+  bottom: auto;
+  height: 32px;
+  overflow: visible;
+}
+.rightWires .wireFlow { stroke-width: 1.5; }
+.workflowMap { display: block; max-width: 360px; margin-inline: auto; overflow: hidden; }
+.workflowHeading { flex-wrap: wrap; }
+.workflowSteps { min-width: 0; }
+.workflowSteps button { min-width: 0; overflow-wrap: anywhere; }
+.windowTitle { min-width: 0; flex: 1; }
+.windowDots, .windowDotsColored { flex-shrink: 0; }
+.previewWindow, .codeWindow, .workflow, .metricCell { min-width: 0; max-width: 100%; }
+.codeStatus { overflow-wrap: anywhere; }
+.verticalConnector { flex-shrink: 0; }
+@media (min-width: 1024px) {
+  .diagramFrame { grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr) minmax(0, 1.2fr); }
+  .rightStage { padding-left: 2rem; }
+  .rightWires { width: 2rem; height: 32px; }
+  .workflowMap { width: 100%; height: 132px; }
+  .windowBadge { max-width: 43%; overflow: hidden; text-overflow: ellipsis; }
+}
+
+.previewShell { position: relative; min-width: 0; }
+.previewShell .rightWires { top: calc(50% - 16px); left: -3.1rem; width: 3.1rem; }
+@media (min-width: 1024px) {
+  .previewShell .rightWires { left: -2rem; width: 2rem; }
+}

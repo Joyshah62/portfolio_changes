@@ -1,126 +1,923 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Bot,
+  BrainCircuit,
+  Cloud,
+  Code2,
+  Database,
+  Globe,
+  Play,
+  Pause,
+  type LucideIcon,
+} from 'lucide-react';
 import { skillCategories } from '@/data/site';
-import { useInViewport } from './three/shared';
+import { logoSvg } from '@/lib/skillLogos';
+import { useTheme } from '@/hooks/useTheme';
+import { textOn } from './SkillsWheel';
 import SectionHeader from './SectionHeader';
+import SkillWorkflow from './SkillWorkflow';
+import styles from './Skills.module.css';
 
-const SkillsGlobe = dynamic(() => import('./three/SkillsGlobe'), {
-  ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 grid place-items-center">
-      <div className="h-2/3 w-2/3 animate-pulse rounded-full border border-line" />
-    </div>
-  ),
-});
+const COUNT = skillCategories.length;
+const TOTAL_TOOLS = skillCategories.reduce((sum, category) => sum + category.skills.length, 0);
+
+// Ring geometry (SVG coordinate space 520 × 520)
+const C = 260;
+const R_INNER = 192;
+const R_OUTER = 236;
+const R_MID = (R_INNER + R_OUTER) / 2;
+const SEG = 360 / COUNT;
+const GAP = 1.6;
+
+const rad = (deg: number) => (deg * Math.PI) / 180;
+// Rounded to 2 decimals so server and client produce byte-identical SVG attributes (avoids hydration drift).
+const fx = (n: number) => Math.round(n * 100) / 100;
+const polar = (r: number, deg: number) =>
+  [fx(C + r * Math.sin(rad(deg))), fx(C - r * Math.cos(rad(deg)))] as const;
+
+function sectorPath(r0: number, r1: number, a0: number, a1: number) {
+  const large = a1 - a0 > 180 ? 1 : 0;
+  const [x0, y0] = polar(r1, a0);
+  const [x1, y1] = polar(r1, a1);
+  const [x2, y2] = polar(r0, a1);
+  const [x3, y3] = polar(r0, a0);
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${r1} ${r1} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}A${r0} ${r0} 0 ${large} 0 ${x3.toFixed(2)} ${y3.toFixed(2)}Z`;
+}
+
+// Left tile grid: EVERY tool gets a cell (37 tools in a 5 × 8 = 40-cell grid), laid out
+// category by category so each discipline reads as a contiguous block.
+const GRID_COLS = 5;
+const GRID_ROWS = 8;
+const GRID_W = 360; // SVG wire-space width
+const GRID_H = 512;
+const CELL_W = (GRID_W * 0.7778) / GRID_COLS; // grid occupies the left 77.78%; the rest is the wire bus
+const CELL_H = GRID_H / GRID_ROWS;
+const BUS_X = 326;
+
+interface GridTile {
+  row: number;
+  col: number;
+  skill: string;
+  catIndex: number;
+  /** Where this tile's trace meets the vertical collector bus (SVG y) */
+  junctionY: number;
+  /** Short caption shown under the icon */
+  caption: string;
+}
+
+const CAPTIONS: Record<string, string> = {
+  'LLM Agents': 'Agents',
+  'Tool Calling': 'Tools',
+  'Hybrid Search': 'Hybrid',
+  'Prompt Engineering': 'Prompts',
+  'Scikit Learn': 'Sklearn',
+  'REST APIs': 'REST',
+  'JupyterLab Extensions': 'Jupyter',
+  'AWS (S3)': 'AWS',
+  PostgreSQL: 'Postgres',
+  TypeScript: 'TS',
+  JavaScript: 'JS',
+};
+
+const GRID_TILES: GridTile[] = (() => {
+  const tiles: GridTile[] = [];
+  let cell = 0;
+  skillCategories.forEach((cat, catIndex) => {
+    cat.skills.forEach(skill => {
+      const row = Math.floor(cell / GRID_COLS) + 1;
+      const col = (cell % GRID_COLS) + 1;
+      // Fan junctions out slightly by column so traces in the same row don't overlap on the bus
+      const junctionY = fx((row - 0.5) * CELL_H + (col - 3) * 7);
+      tiles.push({ row, col, skill, catIndex, junctionY, caption: CAPTIONS[skill] ?? skill });
+      cell += 1;
+    });
+  });
+  return tiles;
+})();
+
+interface DisciplineBlueprint {
+  icon: LucideIcon;
+  headline: string;
+  highlightedPills: string[];
+  project: string;
+  projectUrl: string;
+  previewTitle: string;
+  previewBadge: string;
+  previewMetrics: Array<{ label: string; value: string }>;
+  command: string;
+  statusLine: string;
+  json: Record<string, string | number | boolean | string[]>;
+  footerCheck: string;
+  footerSub: string;
+}
+
+const BLUEPRINTS: Record<string, DisciplineBlueprint> = {
+  ai: {
+    icon: Bot,
+    headline: 'Orchestrate multi-turn AI agents',
+    highlightedPills: ['LLM Agents', 'Tool Calling', 'RAG', 'Gemini'],
+    project: 'Composur · CodeBench · PlaNYt',
+    projectUrl: '#projects',
+    previewTitle: 'composur.tech // interview-session',
+    previewBadge: 'VOICE + RAG LIVE',
+    previewMetrics: [
+      { label: 'Retriever', value: 'Hybrid + Rerank' },
+      { label: 'Voice latency', value: '340 ms' },
+    ],
+    command: 'agent.run({ model: "gemini-2.5", tools: [rag, sandbox] })',
+    statusLine: 'Retrieving resume context & executing tool call...',
+    json: {
+      session: 'composur_voice_04',
+      intent: 'follow_up_probe',
+      retrieved_chunks: 6,
+      rerank_score: 0.94,
+      voice_stream: 'elevenlabs_turbo_v2',
+      rubric_pass: true,
+    },
+    footerCheck: '3 production agent pipelines shipped',
+    footerSub: 'Saved to telemetry: session_trace.jsonl',
+  },
+  ml: {
+    icon: BrainCircuit,
+    headline: 'Detect threats & spoofing in real time',
+    highlightedPills: ['PyTorch', 'BERT', 'YOLO', 'OpenCV'],
+    project: 'Forenzy WAF · IEEE CICT Liveness',
+    projectUrl: '#projects',
+    previewTitle: 'forenzy.ai // ensemble-telemetry',
+    previewBadge: '97.2% F1 SCORE',
+    previewMetrics: [
+      { label: 'False positives', value: '23% → 4%' },
+      { label: 'Daily volume', value: '2.1 GB/day' },
+    ],
+    command: 'ensemble.predict({ models: 5, stream: "nginx_modsec" })',
+    statusLine: 'Running 5-BERT classifier ensemble on HTTP payload...',
+    json: {
+      Models: '5x_BERT_Ensemble',
+      threat_class: 'SQLi_union_bypass',
+      confidence: 0.984,
+      false_positive_rate: '4.0%',
+      liveness_accuracy: '98.5%',
+      triage_reduction: '-65%',
+    },
+    footerCheck: '100,000+ security records classified',
+    footerSub: 'Published at: IEEE_CICT_2024.pdf',
+  },
+  web: {
+    icon: Globe,
+    headline: 'Ship full-stack interfaces & APIs',
+    highlightedPills: ['FastAPI', 'React', 'SQLAlchemy', 'JupyterLab Extensions'],
+    project: 'CodeBench @ Rutgers · Composur',
+    projectUrl: '#projects',
+    previewTitle: 'codebench.rutgers // jupyter-tutor',
+    previewBadge: 'EXTENSION ACTIVE',
+    previewMetrics: [
+      { label: 'Notebook RPC', value: 'FastAPI + JWT' },
+      { label: 'Migrations', value: 'Alembic SQL' },
+    ],
+    command: 'fastapi.post("/v1/notebook/cell-assist", { cell_id: 14 })',
+    statusLine: 'Inspecting active JupyterLab AST & running unit checks...',
+    json: {
+      service: 'codebench_api_v2',
+      extension: '@codebench/jupyter-tutor',
+      auth_guard: 'jwt_rs256_verified',
+      orm_session: 'sqlalchemy_async',
+      guided_hint: 'Check base case on line 12',
+      status: '200_OK',
+    },
+    footerCheck: 'End-to-end React + FastAPI architecture',
+    footerSub: 'Synced to state: notebook_replay.db',
+  },
+  databases: {
+    icon: Database,
+    headline: 'Index vectors & relational state',
+    highlightedPills: ['PostgreSQL', 'pgvector', 'MongoDB'],
+    project: 'Composur Hybrid Search · CodeBench',
+    projectUrl: '#projects',
+    previewTitle: 'pgvector // hybrid-ann-index',
+    previewBadge: 'HNSW + BM25',
+    previewMetrics: [
+      { label: 'Index type', value: 'HNSW Cosine' },
+      { label: 'Query p95', value: '11.4 ms' },
+    ],
+    command: 'db.query("SELECT * FROM chunks ORDER BY emb <=> $1 LIMIT 6")',
+    statusLine: 'Fusing dense pgvector cosine similarity with lexical BM25...',
+    json: {
+      engine: 'postgresql_16_pgvector',
+      dimensions: 1536,
+      distance_metric: 'cosine_hnsw',
+      hybrid_fusion: 'reciprocal_rank',
+      replayed_turns: 1420,
+      acid_compliant: true,
+    },
+    footerCheck: 'Sub-15ms hybrid vector + relational queries',
+    footerSub: 'Indexed in cluster: prod_vectors.sql',
+  },
+  cloud: {
+    icon: Cloud,
+    headline: 'Isolate & scale container workloads',
+    highlightedPills: ['Docker', 'AWS (S3)', 'Nginx', 'Linux'],
+    project: 'Composur Sandboxes · Forenzy Pipeline',
+    projectUrl: '#projects',
+    previewTitle: 'docker // sandbox-runner-pool',
+    previewBadge: 'ISOLATED EXEC',
+    previewMetrics: [
+      { label: 'Gateway', value: 'Nginx + ModSec' },
+      { label: 'Storage', value: 'AWS S3 Buckets' },
+    ],
+    command: 'docker.run({ image: "sandbox:py312", net: "none", cpu: 0.5 })',
+    statusLine: 'Spinning ephemeral container & streaming stdout logs...',
+    json: {
+      runtime: 'docker_isolated_sandbox',
+      reverse_proxy: 'nginx_modsecurity',
+      artifact_store: 's3://composur-runs/',
+      memory_limit: '256MB',
+      network_policy: 'airgapped',
+      exit_code: 0,
+    },
+    footerCheck: 'Zero-trust sandboxed code execution',
+    footerSub: 'Archived to bucket: s3_telemetry.tar.gz',
+  },
+  languages: {
+    icon: Code2,
+    headline: 'Write type-safe systems & ML code',
+    highlightedPills: ['Python', 'TypeScript', 'SQL'],
+    project: 'Across all 5 production systems',
+    projectUrl: '#projects',
+    previewTitle: 'runtime // polyglot-typecheck',
+    previewBadge: 'STRICT MODE',
+    previewMetrics: [
+      { label: 'Backend / ML', value: 'Python 3.12' },
+      { label: 'Frontend / UI', value: 'TypeScript 5' },
+    ],
+    command: 'pipeline.compile({ py: "3.12", ts: "strict", sql: "pg16" })',
+    statusLine: 'Validating Pydantic schemas against TypeScript client types...',
+    json: {
+      primary_ml: 'Python (PyTorch, FastAPI)',
+      primary_ui: 'TypeScript (React, Next.js)',
+      query_layer: 'SQL (PostgreSQL, MySQL)',
+      type_coverage: '100%',
+      lint_errors: 0,
+    },
+    footerCheck: '4 core languages across AI, web & data',
+    footerSub: 'Verified build: schema_contracts.d.ts',
+  },
+};
+
+const AUTOPLAY_MS = 6500;
+
+/** Types `text` out character by character; re-runs whenever the text changes. */
+function Typewriter({ text, instant }: { text: string; instant: boolean }) {
+  const [shown, setShown] = useState(instant ? text : '');
+  useEffect(() => {
+    if (instant) return;
+    let i = 0;
+    const id = window.setInterval(() => {
+      i += 1;
+      setShown(text.slice(0, i));
+      if (i >= text.length) window.clearInterval(id);
+    }, 14);
+    return () => window.clearInterval(id);
+  }, [text, instant]);
+  return (
+    <>
+      {instant ? text : shown}
+      {!instant && shown.length < text.length && <span className={styles.caret}>▍</span>}
+    </>
+  );
+}
 
 export default function Skills() {
-  const [active, setActive] = useState<string | null>(null);
-  const stage = useRef<HTMLDivElement>(null);
-  const visible = useInViewport(stage);
+  const [active, setActive] = useState<number>(0);
+  const [focusedSkill, setFocusedSkill] = useState<string | null>(null);
+  const [autoplay, setAutoplay] = useState(true);
+  const [keyboardEngaged, setKeyboardEngaged] = useState(false);
+  const [engaged, setEngaged] = useState(false); // pointer is over the diagram
+  const [inView, setInView] = useState(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion() ?? false;
+  const { theme } = useTheme();
+
+  const category = skillCategories[active];
+  const blueprint = BLUEPRINTS[category.id] ?? BLUEPRINTS.ai;
+  const CenterIcon = blueprint.icon;
+
+  // Tiles belonging to the currently selected category
+  const activeTiles = GRID_TILES.filter(t => t.catIndex === active);
+
+  const stepCategory = (dir: -1 | 1) => {
+    setFocusedSkill(null);
+    setActive(prev => (prev + dir + COUNT) % COUNT);
+  };
+
+  const selectCategory = (index: number, skill: string | null = null) => {
+    setActive(index);
+    setFocusedSkill(skill);
+  };
+
+  // Only auto-advance while the diagram is on screen
+  useEffect(() => {
+    const node = frameRef.current;
+    if (!node) return;
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.35 });
+    io.observe(node);
+    return () => io.disconnect();
+  }, []);
+
+  // Auto-cycle through disciplines; pauses while hovered, when reduced motion is on, or when toggled off
+  useEffect(() => {
+    if (!autoplay || engaged || keyboardEngaged || !inView || reducedMotion) return;
+    const id = window.setInterval(() => {
+      setFocusedSkill(null);
+      setActive(prev => (prev + 1) % COUNT);
+    }, AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [autoplay, engaged, keyboardEngaged, inView, reducedMotion]);
+
+  const onRingKeyDown = (event: KeyboardEvent, index: number) => {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+    if (step) {
+      event.preventDefault();
+      const next = (index + step + COUNT) % COUNT;
+      selectCategory(next);
+      const selector = event.currentTarget.getAttribute('role') === 'tab' ? '[role="tab"]' : '[role="radio"]';
+      const siblings = event.currentTarget.parentElement?.querySelectorAll<HTMLElement | SVGElement>(selector);
+      siblings?.[next]?.focus();
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectCategory(index);
+    }
+  };
 
   return (
-    <section id="skills" className="relative overflow-hidden px-4 py-28 sm:px-8 md:py-40">
-      <div className="mx-auto max-w-[1400px]">
-        <SectionHeader index="05" label="Skills" title={<>What I work <em>with.</em></>} aside={`${skillCategories.length} areas`} />
+    <section
+      id="skills"
+      className={`${styles.skillsSection} relative px-4 py-16 sm:px-8 md:py-20`}
+      onFocusCapture={() => setKeyboardEngaged(true)}
+      onBlurCapture={event => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setKeyboardEngaged(false);
+      }}
+      aria-label="Skills and technologies"
+    >
+      <div className="mx-auto max-w-[1240px]">
+        <SectionHeader
+          index="05"
+          label="Skills"
+          title={
+            <>
+              A stack of <em>possibilities.</em>
+            </>
+          }
+          aside={`${COUNT} disciplines · ${TOTAL_TOOLS} tools`}
+        />
 
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-8">
-          {/* Categories */}
-          <div className="lg:col-span-5">
-            <p className="mb-8 max-w-md text-[1.02rem] leading-relaxed text-ink-soft">
-              Python for models and services. TypeScript for the interface. Databases and infrastructure
-              to connect the pieces. Select a category to explore the tools I use.
-            </p>
-
-            <ul className="border-t border-ink">
-              {skillCategories.map((cat, i) => {
-                const isActive = active === cat.id;
-                return (
-                  <li key={cat.id} className="border-b border-line">
-                    <button
-                      onClick={() => setActive(isActive ? null : cat.id)}
-                      aria-expanded={isActive}
-                      className="group flex w-full items-center gap-4 py-4 text-left"
-                    >
-                      <span className="eyebrow w-6 text-muted">0{i + 1}</span>
-                      <span
-                        className="h-3 w-3 shrink-0 rounded-full transition-transform duration-300 group-hover:scale-125"
-                        style={{ background: cat.color }}
-                      />
-                      <span
-                        className={`flex-1 font-serif text-[1.9rem] leading-none tracking-tight transition-colors duration-300 ${
-                          isActive ? 'italic' : ''
-                        }`}
-                        style={{ color: isActive ? cat.color : undefined }}
-                      >
-                        {cat.label}
-                      </span>
-                      <span className="font-mono text-xs text-muted">{cat.skills.length}</span>
-                      <Plus
-                        size={18}
-                        className={`text-ink transition-transform duration-300 ${isActive ? 'rotate-45' : ''}`}
-                      />
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {isActive && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                          className="overflow-hidden"
-                        >
-                          <div className="flex flex-wrap gap-2 pb-5 pl-10">
-                            {cat.skills.map((s) => (
-                              <span
-                                key={s}
-                                className="rounded-full border px-3 py-1 font-mono text-[0.7rem]"
-                                style={{ borderColor: `${cat.color}55`, color: cat.color }}
-                              >
-                                {s}
-                              </span>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </li>
-                );
-              })}
-            </ul>
+        {/* Top Discipline Selector Bar */}
+        <div className={styles.navBar}>
+          <div className={styles.pills} role="tablist" aria-label="Choose a skill discipline">
+            {skillCategories.map((cat, i) => {
+              const isSelected = active === i;
+              return (
+                <button
+                  type="button"
+                  role="tab"
+                  key={cat.id}
+                  aria-selected={isSelected}
+                  tabIndex={isSelected ? 0 : -1}
+                  onKeyDown={event => onRingKeyDown(event, i)}
+                  onClick={() => selectCategory(i)}
+                  style={
+                    isSelected
+                      ? {
+                          background: cat.color,
+                          borderColor: cat.color,
+                          color: textOn(cat.color),
+                        }
+                      : undefined
+                  }
+                >
+                  <span className={styles.pillIndex}>0{i + 1}</span>
+                  <i style={{ background: isSelected ? 'currentColor' : cat.color }} />
+                  <span>{cat.label}</span>
+                  <span className={styles.pillCount}>{cat.skills.length}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Globe */}
-          <div className="lg:col-span-7">
-            <div
-              ref={stage}
-              className="relative aspect-square w-full overflow-hidden rounded-[32px] border border-line bg-card"
-              aria-hidden
+          <div className={styles.stepControls} aria-label="Cycle disciplines">
+            <button
+              type="button"
+              className={`${styles.autoBtn} ${autoplay && !reducedMotion ? styles.autoBtnOn : ''}`}
+              onClick={() => setAutoplay(v => !v)}
+              aria-pressed={autoplay}
+              aria-label={autoplay ? 'Pause auto-cycle' : 'Resume auto-cycle'}
+              title={autoplay ? 'Pause auto-cycle' : 'Resume auto-cycle'}
+              style={{ '--accent': category.color, '--accent-on': textOn(category.color) } as React.CSSProperties}
             >
-              <div
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  backgroundImage:
-                    'radial-gradient(50% 50% at 50% 50%, rgba(255,79,31,0.08), transparent 70%), radial-gradient(color-mix(in srgb, var(--color-ink) 8%, transparent) 1px, transparent 1px)',
-                  backgroundSize: '100% 100%, 22px 22px',
-                }}
-              />
-              <SkillsGlobe active={active} visible={visible} />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between p-5">
-                <span className="eyebrow text-muted">
-                  <span className="hidden md:inline">Drag to spin</span>
-                  <span className="md:hidden">Rotating view</span>
-                </span>
-                <span className="eyebrow text-muted">
-                  {active ? skillCategories.find((c) => c.id === active)!.label : 'All skills'}
-                </span>
-              </div>
-            </div>
+              {autoplay ? <Pause size={13} /> : <Play size={13} />}
+              {autoplay && !reducedMotion && (
+                <span key={active} className={styles.autoRing} style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => stepCategory(-1)}
+              aria-label="Previous discipline"
+              title="Previous discipline"
+            >
+              <ArrowLeft size={15} />
+            </button>
+            <button
+              type="button"
+              onClick={() => stepCategory(1)}
+              aria-label="Next discipline"
+              title="Next discipline"
+            >
+              <ArrowRight size={15} />
+            </button>
           </div>
         </div>
+
+        {/* ============================================================
+            THREE-STAGE ARCHITECTURAL PIPELINE DIAGRAM
+            [Left: Logo Tile Grid] ---> [Center: Segmented Hub] ---> [Right: Live Output]
+        ============================================================ */}
+        <div
+          ref={frameRef}
+          className={styles.diagramFrame}
+          style={{ '--accent': category.color, '--accent-on': textOn(category.color) } as React.CSSProperties}
+          onPointerEnter={() => setEngaged(true)}
+          onPointerLeave={() => setEngaged(false)}
+        >
+          {/* ---------------- LEFT STAGE: ECOSYSTEM LOGO GRID + ORTHOGONAL WIRES ---------------- */}
+          <div className={styles.leftStage}>
+            <div className={styles.stageLabel}>
+              <span>INPUT // ALL {TOTAL_TOOLS} TOOLS</span>
+              <span>{activeTiles.length} ROUTED</span>
+            </div>
+
+            <div className={styles.gridCanvas}>
+              {/* 5 × 8 Background Architectural Cells */}
+              <div className={styles.cellMatrix} aria-hidden="true">
+                {Array.from({ length: 40 }, (_, idx) => (
+                  <div key={idx} className={styles.emptyCell} />
+                ))}
+              </div>
+
+              {/* Placed Interactive Logo Tiles */}
+              {GRID_TILES.map(tile => {
+                const tileCat = skillCategories[tile.catIndex];
+                const isCatActive = tile.catIndex === active;
+                const isSkillFocused = focusedSkill === tile.skill;
+                const leftPct = ((tile.col - 1) / GRID_COLS) * 77.78;
+                const topPct = ((tile.row - 1) / GRID_ROWS) * 100;
+                const order = isCatActive ? activeTiles.indexOf(tile) : 0;
+
+                return (
+                  <button
+                    type="button"
+                    // Re-key active tiles per discipline so the pop-in animation replays on every switch
+                    key={isCatActive ? `${tile.skill}-${category.id}` : tile.skill}
+                    className={`${styles.logoTile} ${isCatActive ? styles.logoTileActive : ''} ${
+                      isSkillFocused ? styles.logoTileFocused : ''
+                    }`}
+                    style={{
+                      left: `${leftPct}%`,
+                      top: `${topPct}%`,
+                      '--tile-color': tileCat.color,
+                      '--i': order,
+                    } as React.CSSProperties}
+                    onClick={() => selectCategory(tile.catIndex, tile.skill)}
+                    onPointerEnter={() => {
+                      if (isCatActive) setFocusedSkill(tile.skill);
+                    }}
+                    onPointerLeave={() => setFocusedSkill(null)}
+                    title={`${tile.skill} (${tileCat.label})`}
+                    aria-label={`Select ${tile.skill} in ${tileCat.label}`}
+                  >
+                    <span
+                      className={styles.tileIcon}
+                      dangerouslySetInnerHTML={{
+                        __html: logoSvg(
+                          tile.skill,
+                          'currentColor',
+                          theme,
+                        ),
+                      }}
+                    />
+                    <span className={styles.tileCaption}>{tile.caption}</span>
+                    {/* Orange / Accent Diamond Port on the Right Edge of Active Tiles */}
+                    {isCatActive && (
+                      <span
+                        className={styles.diamondPort}
+                        style={{ background: category.color }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+
+              {/* Orthogonal Circuit Wires Routing from Active Tiles into the Center Wheel */}
+              <svg
+                className={styles.leftWires}
+                viewBox="0 0 360 512"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                {/* Vertical collector bus & main horizontal feed into the wheel */}
+                <path
+                  d={`M ${BUS_X} 24 L ${BUS_X} 488 M ${BUS_X} 256 L 358 256`}
+                  className={styles.wireBus}
+                />
+                {/* Signal flowing along the feed into the wheel */}
+                <path
+                  d={`M ${BUS_X} 256 L 358 256`}
+                  className={styles.wireFlow}
+                  style={{ stroke: category.color }}
+                />
+                {/* Arrowhead entering the wheel */}
+                <path
+                  d="M 347 250 L 355 256 L 347 262"
+                  className={styles.wireArrow}
+                />
+
+                {activeTiles.map((tile, k) => {
+                  // Trace leaves the tile's right-edge diamond port
+                  const startX = fx(tile.col * CELL_W);
+                  const startY = fx((tile.row - 0.5) * CELL_H);
+                  // Stagger the vertical riser per tile so parallel traces stay distinct
+                  const riserX = fx(BUS_X - 10 - (k % 4) * 6);
+                  const d = `M ${startX} ${startY} H ${riserX} V ${tile.junctionY} H ${BUS_X}`;
+                  const isFocused = focusedSkill === tile.skill;
+
+                  return (
+                    <g key={`${category.id}-${tile.skill}`}>
+                      <path
+                        d={d}
+                        pathLength={1}
+                        className={`${styles.wireLine} ${isFocused ? styles.wireLineFocused : ''}`}
+                        style={{ stroke: category.color, animationDelay: `${k * 55}ms` }}
+                      />
+                      <circle
+                        cx={BUS_X}
+                        cy={tile.junctionY}
+                        r={isFocused ? 4 : 2.6}
+                        fill={category.color}
+                        className={styles.wireNode}
+                        style={{ animationDelay: `${k * 55 + 260}ms` }}
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          </div>
+
+          {/* ---------------- CENTER STAGE: SEGMENTED RING DIAL + INNER HUB ---------------- */}
+          <div className={styles.centerStage}>
+            <div className={styles.wheelContainer}>
+              <svg
+                className={styles.ringSvg}
+                viewBox="0 0 520 520"
+                role="radiogroup"
+                aria-label="Skill discipline ring"
+              >
+                {/* Subtle outer & inner hairline compass circles (outer one slowly rotates) */}
+                <circle
+                  cx={C}
+                  cy={C}
+                  r={R_OUTER + 10}
+                  className={`${styles.compassHairline} ${styles.compassSpin}`}
+                />
+                <circle cx={C} cy={C} r={R_INNER - 8} className={styles.compassHairline} />
+
+                {/* Accent arc that draws itself along the active segment on every switch */}
+                <path
+                  key={`arc-${category.id}`}
+                  d={sectorPath(R_OUTER + 4, R_OUTER + 6, active * SEG + 60 - SEG / 2 + GAP, active * SEG + 60 + SEG / 2 - GAP)}
+                  pathLength={1}
+                  className={styles.activeArc}
+                  style={{ fill: category.color }}
+                />
+
+                {/* 6 Segmented Ring Arcs with Icons */}
+                {skillCategories.map((cat, i) => {
+                  // Offset so segment 0 sits prominently on the right-upper arc (like the reference image)
+                  const centerDeg = i * SEG + 60;
+                  const a0 = centerDeg - SEG / 2 + GAP;
+                  const a1 = centerDeg + SEG / 2 - GAP;
+                  const isSelected = i === active;
+                  const [ix, iy] = polar(R_MID, centerDeg);
+                  const SegIcon = (BLUEPRINTS[cat.id] ?? BLUEPRINTS.ai).icon;
+
+                  return (
+                    <g
+                      key={cat.id}
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-label={cat.label}
+                      tabIndex={isSelected ? 0 : -1}
+                      className={`${styles.ringSegment} ${
+                        isSelected ? styles.ringSegmentActive : ''
+                      }`}
+                      onClick={() => selectCategory(i)}
+                      onKeyDown={e => onRingKeyDown(e, i)}
+                    >
+                      <path
+                        d={sectorPath(R_INNER, R_OUTER, a0, a1)}
+                        style={
+                          isSelected
+                            ? { fill: cat.color, stroke: cat.color }
+                            : undefined
+                        }
+                      />
+                      <foreignObject
+                        x={ix - 14}
+                        y={iy - 14}
+                        width={28}
+                        height={28}
+                        className={styles.segmentIconWrap}
+                      >
+                        <div
+                          className={styles.segmentIcon}
+                          style={{
+                            color: isSelected ? textOn(cat.color) : undefined,
+                          }}
+                        >
+                          <SegIcon size={16} strokeWidth={1.9} />
+                        </div>
+                      </foreignObject>
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* Inner Hub Content (Centered inside the Ring) */}
+              <div className={styles.wheelHub} aria-live="polite">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={category.id}
+                    className={styles.wheelHubInner}
+                    initial={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {/* Prominent Square Accent Badge at Top of Hub */}
+                    <div
+                      className={styles.hubBadge}
+                      style={{
+                        background: category.color,
+                        color: textOn(category.color),
+                      }}
+                    >
+                      <CenterIcon size={20} strokeWidth={2.1} />
+                    </div>
+
+                    <span className={styles.hubKicker}>
+                      0{active + 1} {'//'} {category.label}
+                    </span>
+
+                    <h3 className={styles.hubTitle}>{blueprint.headline}</h3>
+
+                    <span className={styles.hubToolCount}>{category.skills.length} tools · explore below</span>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+            <div className={styles.toolShelf}>
+              <span className={styles.toolShelfLabel}>{category.label} toolkit</span>
+                    {/* Tools stay outside the circular hub so every label has room. */}
+                    <motion.div
+                      key={category.id}
+                      className={styles.hubPillGrid}
+                      initial="hidden"
+                      animate="show"
+                      variants={{
+                        hidden: {},
+                        show: { transition: { staggerChildren: reducedMotion ? 0 : 0.04, delayChildren: 0.08 } },
+                      }}
+                    >
+                      {category.skills.map(skill => {
+                        const isHighlighted =
+                          focusedSkill === skill ||
+                          (focusedSkill === null &&
+                            blueprint.highlightedPills.includes(skill));
+
+                        return (
+                          <motion.button
+                            type="button"
+                            key={skill}
+                            title={skill}
+                            aria-pressed={focusedSkill === skill}
+                            variants={{
+                              hidden: reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.96 },
+                              show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } },
+                            }}
+                            className={`${styles.hubPill} ${
+                              isHighlighted ? styles.hubPillHighlighted : ''
+                            }`}
+                            style={
+                              isHighlighted
+                                ? {
+                                    background: category.color,
+                                    borderColor: category.color,
+                                    color: textOn(category.color),
+                                  }
+                                : undefined
+                            }
+                            onPointerEnter={() => setFocusedSkill(skill)}
+                            onPointerLeave={() => setFocusedSkill(null)}
+                            onClick={() =>
+                              setFocusedSkill(prev => (prev === skill ? null : skill))
+                            }
+                          >
+                            {skill}
+                          </motion.button>
+                        );
+                      })}
+                    </motion.div>
+            </div>
+          </div>
+
+          {/* ---------------- RIGHT STAGE: ARCHITECTURAL PREVIEW + LIVE CODE/JSON WINDOW ---------------- */}
+          <div className={styles.rightStage}>
+
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={category.id}
+                className={styles.rightStack}
+                initial={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: -6 }}
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className={styles.previewShell}>
+            {/* Orthogonal Connector Wire from Wheel Rim to Right Windows */}
+            <svg
+              className={styles.rightWires}
+              viewBox="0 0 56 32"
+              preserveAspectRatio="xMidYMid meet"
+              aria-hidden="true"
+            >
+              <path
+                d="M2 16 H48"
+                className={styles.wireBus}
+                style={{ stroke: category.color }}
+              />
+              <path
+                d="M2 16 H48"
+                className={styles.wireFlow}
+                style={{ stroke: category.color }}
+              />
+              <path
+                d="M41 9 L48 16 L41 23"
+                className={styles.wireArrow}
+                style={{ stroke: category.color }}
+              />
+            </svg>
+
+                {/* Top Window: System / Architecture Wireframe Card */}
+                <div className={styles.previewWindow}>
+                  <div className={styles.windowChrome}>
+                    <div className={styles.windowDots}>
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                    <span className={styles.windowTitle}>{blueprint.previewTitle}</span>
+                    <span
+                      className={styles.windowBadge}
+                      style={{
+                        color: 'var(--accent-ink)',
+                        borderColor: category.color,
+                      }}
+                    >
+                      {blueprint.previewBadge}
+                    </span>
+                  </div>
+
+                  <SkillWorkflow key={category.id} domain={category.id} reducedMotion={reducedMotion} />
+                  <div className={styles.previewMetrics}>
+                    {blueprint.previewMetrics.map(metric => (
+                      <div key={metric.label} className={styles.metricCell}>
+                        <small>{metric.label}</small>
+                        <strong>{metric.value}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                </div>
+
+                {/* Vertical Arrow Connector Between Top & Bottom Window */}
+                <div className={styles.verticalConnector} aria-hidden="true">
+                  <span className={styles.verticalLine} />
+                  <span className={styles.verticalChevron} />
+                </div>
+
+                {/* Bottom Window: Structured Code & JSON Output Inspector */}
+                <div
+                  className={styles.codeWindow}
+                  style={{ borderColor: category.color }}
+                >
+                  <div
+                    className={styles.windowChrome}
+                    style={{
+                      borderBottomColor: `color-mix(in srgb, ${category.color} 28%, var(--color-line))`,
+                    }}
+                  >
+                    <div className={styles.windowDotsColored}>
+                      <span style={{ background: category.color }} />
+                      <span style={{ background: category.color, opacity: 0.55 }} />
+                      <span style={{ background: category.color, opacity: 0.28 }} />
+                    </div>
+                    <span className={styles.windowTitle}>
+                      {focusedSkill
+                        ? `node // ${focusedSkill.toLowerCase().replace(/\s+/g, '_')}.ts`
+                        : `pipeline // ${category.id}_output.json`}
+                    </span>
+                  </div>
+
+                  <div className={styles.codeBody}>
+                    <div className={styles.codeCommand}>{blueprint.command}</div>
+                    <div
+                      className={styles.codeStatus}
+                      style={{ color: 'var(--accent-ink)' }}
+                    >
+                      <span className={styles.statusBlip} style={{ background: category.color }} />
+                      <Typewriter
+                        key={focusedSkill ?? category.id}
+                        text={focusedSkill ? `Inspecting ${focusedSkill} integration...` : blueprint.statusLine}
+                        instant={reducedMotion}
+                      />
+                    </div>
+
+                    <pre className={styles.jsonBlock}>
+                      {'{\n'}
+                      {Object.entries(blueprint.json).map(([k, v], i) => (
+                        <div
+                          key={k}
+                          className={styles.jsonRow}
+                          style={{ animationDelay: `${120 + i * 70}ms` }}
+                        >
+                          <span className={styles.jsonKey}>&quot;{k}&quot;</span>:{' '}
+                          <span className={styles.jsonVal}>
+                            {typeof v === 'string' ? `"${v}"` : String(v)}
+                          </span>
+                          ,
+                        </div>
+                      ))}
+                      {focusedSkill && (
+                        <div className={styles.jsonRow}>
+                          <span className={styles.jsonKey}>&quot;active_tool&quot;</span>:{' '}
+                          <span
+                            className={styles.jsonHighlight}
+                            style={{ color: 'var(--accent-ink)' }}
+                          >
+                            &quot;{focusedSkill}&quot;
+                          </span>
+                          ,
+                        </div>
+                      )}
+                      {'}'}
+                    </pre>
+
+                    <div className={styles.codeFooter}>
+                      <p
+                        className={styles.codeCheck}
+                        style={{ color: 'var(--accent-ink)' }}
+                      >
+                        ✓ {blueprint.footerCheck}
+                      </p>
+                      <div className={styles.codeSavedRow}>
+                        <span>{blueprint.footerSub}</span>
+                        <a href={blueprint.projectUrl} className={styles.seeWorkLink}>
+                          {blueprint.project.split('·')[0].trim()}{' '}
+                          <ArrowUpRight size={13} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Full list for screen readers and search engines */}
+        <ul className="sr-only">
+          {skillCategories.map(cat => (
+            <li key={cat.id}>
+              {cat.label}: {cat.skills.join(', ')}
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
