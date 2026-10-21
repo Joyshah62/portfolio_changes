@@ -33,7 +33,6 @@
   border: 1px solid var(--color-line);
   border-radius: 999px;
   background: color-mix(in srgb, var(--color-card) 86%, transparent);
-  backdrop-filter: blur(10px);
   font-size: 0.76rem;
   color: var(--color-ink-soft);
   cursor: pointer;
@@ -153,14 +152,8 @@
   gap: 0;
   padding: clamp(1.25rem, 2.5vw, 2.25rem);
   border: 1px solid var(--color-line);
-  border-radius: 28px;
-  background:
-    radial-gradient(
-      circle at 48% 50%,
-      color-mix(in srgb, var(--accent, #ff4f1f) 9%, transparent),
-      transparent 60%
-    ),
-    var(--color-card);
+  border-radius: 12px;
+  background: var(--color-card);
   overflow: hidden;
   font-family: 'Skills Inter', system-ui, sans-serif;
   transition: background 350ms ease;
@@ -174,13 +167,7 @@
   --ring-stroke: color-mix(in srgb, var(--color-ink) 22%, transparent);
   --wire-ink: color-mix(in srgb, var(--color-ink) 42%, transparent);
   --tile-idle-opacity: 0.82;
-  background:
-    radial-gradient(
-      circle at 48% 50%,
-      color-mix(in srgb, var(--accent, #ff4f1f) 12%, transparent),
-      transparent 60%
-    ),
-    var(--color-card);
+  background: var(--color-card);
 }
 
 /* ============================================================
@@ -245,30 +232,18 @@
   gap: 0.18rem;
   padding: 0.25rem;
   border: 1px solid transparent;
+  border-radius: 2px;
   background: transparent;
   color: var(--color-ink-soft);
   opacity: var(--tile-idle-opacity);
   cursor: pointer;
   z-index: 2;
   transition:
-    opacity 200ms ease,
-    background-color 200ms ease,
-    border-color 200ms ease,
-    transform 200ms ease,
-    box-shadow 200ms ease;
-}
-
-/* Tiny category-colour tick in the top-left corner of every tile, so the grid reads as 6 colour-coded blocks */
-.logoTile::before {
-  content: '';
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--tile-color, var(--color-muted));
-  opacity: 0.7;
+    opacity 240ms ease,
+    color 280ms ease,
+    background-color 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease;
 }
 
 .logoTile:hover {
@@ -282,26 +257,14 @@
   z-index: 4;
   color: var(--color-ink);
   background: var(--tile-raised);
-  border: 1px solid color-mix(in srgb, var(--tile-color, var(--color-signal)) 65%, var(--color-line));
-  border-radius: 6px;
-  box-shadow:
-    0 10px 24px -10px var(--tile-shadow),
-    0 0 0 1px color-mix(in srgb, var(--tile-color, var(--color-signal)) 22%, transparent);
-  /* Staggered pop-in, replayed on every discipline switch via a per-category key */
-  animation: tilePop 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--i, 0) * 45ms);
+  border-color: color-mix(in srgb, var(--color-ink) 40%, var(--color-line));
+  box-shadow: 0 3px 10px -6px var(--tile-shadow);
 }
 
-@keyframes tilePop {
-  from { opacity: 0.3; transform: translateY(6px) scale(0.92); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.logoTileFocused {
-  transform: scale(1.06);
-  border-color: var(--tile-color, var(--color-signal));
-  box-shadow:
-    0 12px 28px -8px color-mix(in srgb, var(--tile-color, var(--color-signal)) 45%, transparent);
+.logoTileFocused,
+.logoTile:focus-visible {
+  border-color: var(--color-ink-soft);
+  box-shadow: 0 5px 14px -8px var(--tile-shadow);
 }
 
 .tileIcon {
@@ -328,21 +291,21 @@
   opacity: 0.78;
 }
 
-/* Signature Diamond Connector Node on the Right Edge of Active Tiles */
+/* Bottom-edge ports keep shared row traces clear of icon centers. */
 .diamondPort {
   position: absolute;
-  right: -4.5px;
-  top: calc(50% - 4px);
+  left: calc(50% - 4px);
+  bottom: -4px;
   width: 8px;
   height: 8px;
   transform: rotate(45deg);
   border-radius: 1.5px;
-  box-shadow: 0 0 8px currentColor;
   pointer-events: none;
 }
 
 /* SVG Orthogonal Circuit Traces */
 .leftWires {
+  overflow: visible;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -457,7 +420,6 @@
 .activeArc {
   stroke: none;
   opacity: 0.95;
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent, #ff4f1f) 70%, transparent));
   animation: arcReveal 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
   transform-box: fill-box;
   transform-origin: center;
@@ -481,17 +443,12 @@
   stroke-width: 1.2;
   transition:
     fill 220ms ease,
-    stroke 220ms ease,
-    filter 220ms ease;
+    stroke 220ms ease;
 }
 
 .ringSegment:hover > path {
   fill: color-mix(in srgb, var(--color-ink) 12%, var(--color-paper-2));
   stroke: var(--color-muted);
-}
-
-.ringSegmentActive > path {
-  filter: drop-shadow(0 6px 20px color-mix(in srgb, var(--accent, #ff4f1f) 38%, transparent));
 }
 
 .ringSegment:focus-visible > path {
@@ -517,19 +474,12 @@
   position: absolute;
   inset: 19.5%;
   border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 50% 24%,
-      color-mix(in srgb, var(--accent, #ff4f1f) 10%, transparent),
-      transparent 68%
-    ),
-    var(--color-paper);
+  background: var(--color-paper);
   border: 1px solid var(--color-line);
   display: grid;
   place-items: center;
   padding: clamp(1rem, 2.2vw, 1.65rem);
   text-align: center;
-  box-shadow: inset 0 1px 0 0 var(--glass-highlight);
 }
 
 .wheelHubInner {
@@ -544,10 +494,9 @@
 .hubBadge {
   width: 40px;
   height: 40px;
-  border-radius: 9px;
+  border-radius: 2px;
   display: grid;
   place-items: center;
-  box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--accent, #ff4f1f) 65%, transparent);
   margin-bottom: 0.1rem;
 }
 
@@ -607,7 +556,6 @@
 
 .hubPillHighlighted {
   font-weight: 600;
-  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--accent, #ff4f1f) 55%, transparent);
 }
 
 /* ============================================================
@@ -868,8 +816,6 @@
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 8px currentColor;
-  animation: blip 1.2s ease-in-out infinite;
 }
 
 @keyframes blip {
@@ -970,6 +916,9 @@
     animation: none;
   }
   .wireLine { stroke-dashoffset: 0; }
+  .logoTile {
+    transition-duration: 120ms;
+  }
 }
 
 /* ============================================================
@@ -1119,14 +1068,14 @@
   .skillsSection h2 { font-size: clamp(2.6rem, 4vw, 3.75rem); margin-top: 1rem; }
   .navBar { margin-bottom: 0.8rem; }
   .diagramFrame {
-    grid-template-columns: minmax(210px, 0.88fr) minmax(280px, 1.12fr) minmax(320px, 1.2fr);
+    grid-template-columns: minmax(210px, 0.8fr) minmax(340px, 1.45fr) minmax(320px, 1.1fr);
     gap: 0;
     padding: 1rem;
     border-radius: 20px;
   }
-  .leftStage { display: flex; height: 390px; gap: 0.45rem; }
+  .leftStage { display: flex; height: 490px; gap: 0.65rem; }
   .centerStage { gap: 0.5rem; }
-  .wheelContainer { width: min(100%, 300px); }
+  .wheelContainer { width: min(100%, 420px); }
   .toolShelf { width: 100%; padding: 0.6rem; }
   .toolShelfLabel { margin-bottom: 0.4rem; }
   .toolShelf .hubPillGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.25rem; }

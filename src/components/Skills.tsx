@@ -65,8 +65,6 @@ interface GridTile {
   col: number;
   skill: string;
   catIndex: number;
-  /** Where this tile's trace meets the vertical collector bus (SVG y) */
-  junctionY: number;
   /** Short caption shown under the icon */
   caption: string;
 }
@@ -92,9 +90,7 @@ const GRID_TILES: GridTile[] = (() => {
     cat.skills.forEach(skill => {
       const row = Math.floor(cell / GRID_COLS) + 1;
       const col = (cell % GRID_COLS) + 1;
-      // Fan junctions out slightly by column so traces in the same row don't overlap on the bus
-      const junctionY = fx((row - 0.5) * CELL_H + (col - 3) * 7);
-      tiles.push({ row, col, skill, catIndex, junctionY, caption: CAPTIONS[skill] ?? skill });
+      tiles.push({ row, col, skill, catIndex, caption: CAPTIONS[skill] ?? skill });
       cell += 1;
     });
   });
@@ -309,6 +305,11 @@ export default function Skills() {
 
   // Tiles belonging to the currently selected category
   const activeTiles = GRID_TILES.filter(t => t.catIndex === active);
+  // One shared trace per row, routed along cell boundaries clear of the logos.
+  const activeRows = Array.from(new Set(activeTiles.map(tile => tile.row))).map(row => ({
+    row,
+    tiles: activeTiles.filter(tile => tile.row === row),
+  }));
 
   const stepCategory = (dir: -1 | 1) => {
     setFocusedSkill(null);
@@ -476,13 +477,11 @@ export default function Skills() {
                 const isSkillFocused = focusedSkill === tile.skill;
                 const leftPct = ((tile.col - 1) / GRID_COLS) * 77.78;
                 const topPct = ((tile.row - 1) / GRID_ROWS) * 100;
-                const order = isCatActive ? activeTiles.indexOf(tile) : 0;
 
                 return (
                   <button
                     type="button"
-                    // Re-key active tiles per discipline so the pop-in animation replays on every switch
-                    key={isCatActive ? `${tile.skill}-${category.id}` : tile.skill}
+                    key={tile.skill}
                     className={`${styles.logoTile} ${isCatActive ? styles.logoTileActive : ''} ${
                       isSkillFocused ? styles.logoTileFocused : ''
                     }`}
@@ -490,7 +489,6 @@ export default function Skills() {
                       left: `${leftPct}%`,
                       top: `${topPct}%`,
                       '--tile-color': tileCat.color,
-                      '--i': order,
                     } as React.CSSProperties}
                     onClick={() => selectCategory(tile.catIndex, tile.skill)}
                     onPointerEnter={() => {
@@ -511,7 +509,7 @@ export default function Skills() {
                       }}
                     />
                     <span className={styles.tileCaption}>{tile.caption}</span>
-                    {/* Orange / Accent Diamond Port on the Right Edge of Active Tiles */}
+                    {/* Bottom-edge ports connect to the shared row trace. */}
                     {isCatActive && (
                       <span
                         className={styles.diamondPort}
@@ -531,7 +529,7 @@ export default function Skills() {
               >
                 {/* Vertical collector bus & main horizontal feed into the wheel */}
                 <path
-                  d={`M ${BUS_X} 24 L ${BUS_X} 488 M ${BUS_X} 256 L 358 256`}
+                  d={`M ${BUS_X} ${Math.min(activeRows[0].row * CELL_H, GRID_H / 2)} V ${Math.max(activeRows[activeRows.length - 1].row * CELL_H, GRID_H / 2)} M ${BUS_X} 256 H 358`}
                   className={styles.wireBus}
                 />
                 {/* Signal flowing along the feed into the wheel */}
@@ -546,17 +544,14 @@ export default function Skills() {
                   className={styles.wireArrow}
                 />
 
-                {activeTiles.map((tile, k) => {
-                  // Trace leaves the tile's right-edge diamond port
-                  const startX = fx(tile.col * CELL_W);
-                  const startY = fx((tile.row - 0.5) * CELL_H);
-                  // Stagger the vertical riser per tile so parallel traces stay distinct
-                  const riserX = fx(BUS_X - 10 - (k % 4) * 6);
-                  const d = `M ${startX} ${startY} H ${riserX} V ${tile.junctionY} H ${BUS_X}`;
-                  const isFocused = focusedSkill === tile.skill;
+                {activeRows.map(({ row, tiles }, k) => {
+                  const startX = fx((Math.min(...tiles.map(tile => tile.col)) - 0.5) * CELL_W);
+                  const junctionY = fx(row * CELL_H);
+                  const d = `M ${startX} ${junctionY} H ${BUS_X}`;
+                  const isFocused = tiles.some(tile => focusedSkill === tile.skill);
 
                   return (
-                    <g key={`${category.id}-${tile.skill}`}>
+                    <g key={`${category.id}-${row}`}>
                       <path
                         d={d}
                         pathLength={1}
@@ -565,7 +560,7 @@ export default function Skills() {
                       />
                       <circle
                         cx={BUS_X}
-                        cy={tile.junctionY}
+                        cy={junctionY}
                         r={isFocused ? 4 : 2.6}
                         fill={category.color}
                         className={styles.wireNode}
