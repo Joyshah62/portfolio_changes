@@ -295,6 +295,7 @@ export default function Skills() {
   const [keyboardEngaged, setKeyboardEngaged] = useState(false);
   const [engaged, setEngaged] = useState(false); // pointer is over the diagram
   const [inView, setInView] = useState(false);
+  const [onScreen, setOnScreen] = useState(false); // any part visible: keeps looping animations running
   const frameRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion() ?? false;
   const { theme } = useTheme();
@@ -321,11 +322,33 @@ export default function Skills() {
     setFocusedSkill(skill);
   };
 
+  // Hover focus: clearing is deferred a beat so gliding between adjacent tools
+  // doesn't flash the inspector back to its default state in between.
+  const clearTimer = useRef<number | undefined>(undefined);
+  // Last hovered tool, kept so the reserved JSON row keeps its text while fading out.
+  const [lastSkill, setLastSkill] = useState('');
+  const hoverSkill = (skill: string) => {
+    window.clearTimeout(clearTimer.current);
+    setFocusedSkill(skill);
+    setLastSkill(skill);
+  };
+  const unhoverSkill = () => {
+    window.clearTimeout(clearTimer.current);
+    clearTimer.current = window.setTimeout(() => setFocusedSkill(null), 90);
+  };
+  useEffect(() => () => window.clearTimeout(clearTimer.current), []);
+
   // Only auto-advance while the diagram is on screen
   useEffect(() => {
     const node = frameRef.current;
     if (!node) return;
-    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.35 });
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setOnScreen(entry.isIntersecting);
+        setInView(entry.isIntersecting && entry.intersectionRatio >= 0.35);
+      },
+      { threshold: [0, 0.35] },
+    );
     io.observe(node);
     return () => io.disconnect();
   }, []);
@@ -450,7 +473,7 @@ export default function Skills() {
         ============================================================ */}
         <div
           ref={frameRef}
-          className={styles.diagramFrame}
+          className={`${styles.diagramFrame} ${onScreen ? '' : styles.offscreen}`}
           style={{ '--accent': category.color, '--accent-on': textOn(category.color) } as React.CSSProperties}
           onPointerEnter={() => setEngaged(true)}
           onPointerLeave={() => setEngaged(false)}
@@ -492,9 +515,9 @@ export default function Skills() {
                     } as React.CSSProperties}
                     onClick={() => selectCategory(tile.catIndex, tile.skill)}
                     onPointerEnter={() => {
-                      if (isCatActive) setFocusedSkill(tile.skill);
+                      if (isCatActive) hoverSkill(tile.skill);
                     }}
-                    onPointerLeave={() => setFocusedSkill(null)}
+                    onPointerLeave={unhoverSkill}
                     title={`${tile.skill} (${tileCat.label})`}
                     aria-label={`Select ${tile.skill} in ${tileCat.label}`}
                   >
@@ -576,19 +599,18 @@ export default function Skills() {
           {/* ---------------- CENTER STAGE: SEGMENTED RING DIAL + INNER HUB ---------------- */}
           <div className={styles.centerStage}>
             <div className={styles.wheelContainer}>
+              {/* Slowly rotating hairline on its own compositor layer: spinning it inside the
+                  ring SVG forced a full SVG repaint every frame, which stuttered page scroll. */}
+              <svg className={styles.compassLayer} viewBox="0 0 520 520" aria-hidden="true">
+                <circle cx={C} cy={C} r={R_OUTER + 10} className={styles.compassHairline} />
+              </svg>
               <svg
                 className={styles.ringSvg}
                 viewBox="0 0 520 520"
                 role="radiogroup"
                 aria-label="Skill discipline ring"
               >
-                {/* Subtle outer & inner hairline compass circles (outer one slowly rotates) */}
-                <circle
-                  cx={C}
-                  cy={C}
-                  r={R_OUTER + 10}
-                  className={`${styles.compassHairline} ${styles.compassSpin}`}
-                />
+                {/* Subtle inner hairline compass circle (the rotating outer one is layered above) */}
                 <circle cx={C} cy={C} r={R_INNER - 8} className={styles.compassHairline} />
 
                 {/* Accent arc that draws itself along the active segment on every switch */}
@@ -726,8 +748,8 @@ export default function Skills() {
                                   }
                                 : undefined
                             }
-                            onPointerEnter={() => setFocusedSkill(skill)}
-                            onPointerLeave={() => setFocusedSkill(null)}
+                            onPointerEnter={() => hoverSkill(skill)}
+                            onPointerLeave={unhoverSkill}
                             onClick={() =>
                               setFocusedSkill(prev => (prev === skill ? null : skill))
                             }
@@ -846,11 +868,13 @@ export default function Skills() {
                       style={{ color: 'var(--accent-ink)' }}
                     >
                       <span className={styles.statusBlip} style={{ background: category.color }} />
-                      <Typewriter
-                        key={focusedSkill ?? category.id}
-                        text={focusedSkill ? `Example integration: ${focusedSkill}` : blueprint.statusLine}
-                        instant={reducedMotion}
-                      />
+                      <span className={styles.statusText}>
+                        <Typewriter
+                          key={focusedSkill ?? category.id}
+                          text={focusedSkill ? `Example integration: ${focusedSkill}` : blueprint.statusLine}
+                          instant={reducedMotion}
+                        />
+                      </span>
                     </div>
 
                     <pre className={styles.jsonBlock}>
@@ -868,18 +892,23 @@ export default function Skills() {
                           ,
                         </div>
                       ))}
-                      {focusedSkill && (
-                        <div className={styles.jsonRow}>
-                          <span className={styles.jsonKey}>&quot;active_tool&quot;</span>:{' '}
-                          <span
-                            className={styles.jsonHighlight}
-                            style={{ color: 'var(--accent-ink)' }}
-                          >
-                            &quot;{focusedSkill}&quot;
-                          </span>
-                          ,
-                        </div>
-                      )}
+                      {/* Always rendered (hidden when idle) so hovering a tool never changes the
+                          panel height — a height change re-centers the grid row, shifts the
+                          hovered tool out from under the pointer and loops into a flicker. */}
+                      <div
+                        className={`${styles.jsonRow} ${styles.jsonRowReserved}`}
+                        data-on={focusedSkill ? 'true' : 'false'}
+                        aria-hidden={!focusedSkill}
+                      >
+                        <span className={styles.jsonKey}>&quot;active_tool&quot;</span>:{' '}
+                        <span
+                          className={styles.jsonHighlight}
+                          style={{ color: 'var(--accent-ink)' }}
+                        >
+                          &quot;{focusedSkill ?? lastSkill}&quot;
+                        </span>
+                        ,
+                      </div>
                       {'}'}
                     </pre>
 

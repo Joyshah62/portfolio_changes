@@ -63,8 +63,10 @@ export default function CustomCursor() {
       let w = 32, h = 32, r = 50, cx = px, cy = py;
       if (next.mode === 'control' || next.mode === 'link') {
         const box = next.element.getBoundingClientRect();
-        // Trace small controls; large cards get a compact action cursor.
-        if (box.width <= 240 && box.height <= 80) {
+        // Trace small rectangular controls; large cards and SVG shapes (e.g. curved ring
+        // segments, whose bounding box isn't their outline) get a compact action cursor.
+        const traceable = !(next.element instanceof SVGElement);
+        if (traceable && box.width <= 240 && box.height <= 80) {
           w = box.width + 8;
           h = box.height + 8;
           cx = box.left + box.width / 2;

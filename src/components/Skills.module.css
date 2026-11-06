@@ -906,7 +906,7 @@
   .wireLine,
   .wireFlow,
   .wireNode,
-  .compassSpin,
+  .compassLayer,
   .activeArc,
   .wireframeSubBars span,
   .statusBlip,
@@ -1131,3 +1131,40 @@
 @media (min-width: 1024px) {
   .previewShell .rightWires { left: -2rem; width: 2rem; }
 }
+
+/* ============================================================
+   STABILITY + SCROLL PERFORMANCE
+============================================================ */
+/* Isolate the explorer so its hover/animation work never invalidates layout or paint
+   outside the frame while the page scrolls. */
+.diagramFrame { contain: layout paint; }
+
+/* Rotating outer hairline lives on its own GPU layer (transform-only, no SVG repaint). */
+.compassLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  will-change: transform;
+  animation: compassSpin 60s linear infinite;
+}
+
+/* Freeze every looping animation while the explorer is off screen. */
+.offscreen *,
+.offscreen *::before,
+.offscreen *::after {
+  animation-play-state: paused !important;
+}
+
+/* Reserved inspector row: fades instead of mounting, so the panel height is constant. */
+.jsonRowReserved {
+  animation: none;
+  transition: opacity 160ms ease;
+}
+.jsonRowReserved[data-on='false'] { opacity: 0; }
+
+/* Status line stays on one line so swapping the hovered tool never reflows the panel. */
+.codeStatus { overflow-wrap: normal; }
+.statusText { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
