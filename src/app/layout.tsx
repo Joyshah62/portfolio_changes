@@ -52,6 +52,10 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   category: "technology",
   formatDetection: { telephone: false, address: false, email: false },
+  // Set GOOGLE_SITE_VERIFICATION (the token from Search Console's HTML tag method) in Vercel to verify.
+  ...(process.env.GOOGLE_SITE_VERIFICATION && {
+    verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
+  }),
 };
 
 export const viewport: Viewport = {

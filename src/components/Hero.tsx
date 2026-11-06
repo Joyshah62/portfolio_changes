@@ -62,6 +62,8 @@ function Intro({ reduced, focusable, ready }: { reduced: boolean; focusable: boo
               animate={{ y: ready ? '0%' : '110%', rotate: ready ? 0 : 5 }}
               transition={{ ...entrance, delay: i * 0.09 }}
             >{word}<span className="hero-name-period">{i === 1 ? '.' : ''}</span></motion.span>
+            {/* Hidden word break so crawlers read "Joy Shah", not "JOYSHAH" */}
+            {i === 0 && <span className="sr-only"> </span>}
           </span>
         ))}
       </h1>
