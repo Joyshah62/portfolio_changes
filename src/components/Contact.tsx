@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, Check, Copy } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './SocialIcons';
 import { contact } from '@/data/site';
+import { track } from '@/lib/analytics';
 import { useMagnetic } from '@/hooks/useMagnetic';
 import { useInViewport } from './three/shared';
 import SectionHeader from './SectionHeader';
@@ -20,6 +21,7 @@ export default function Contact() {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
+    track('contact_click', { location: 'contact', method: 'copy' });
     try {
       await navigator.clipboard.writeText(contact.email);
       setCopied(true);

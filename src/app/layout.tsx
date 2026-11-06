@@ -5,7 +5,7 @@ import CustomCursor from "@/components/CustomCursor";
 import MotionProvider from "@/components/MotionProvider";
 import { themeInitScript } from "@/utils/theme";
 import { site, siteUrl } from "@/lib/seo";
-import { Analytics } from '@vercel/analytics/next';
+import SiteAnalytics from "@/components/SiteAnalytics";
 
 const serif = Instrument_Serif({
   subsets: ["latin"],
@@ -74,7 +74,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-paper text-ink" suppressHydrationWarning>
         <MotionProvider>{children}</MotionProvider>
         <CustomCursor />
-        <Analytics />
+        <SiteAnalytics />
       </body>
     </html>
   );

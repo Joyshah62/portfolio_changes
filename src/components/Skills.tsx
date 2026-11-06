@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { skillCategories } from '@/data/site';
+import { track } from '@/lib/analytics';
 import { logoSvg } from '@/lib/skillLogos';
 import { useTheme } from '@/hooks/useTheme';
 import { textOn } from './SkillsWheel';
@@ -312,12 +313,19 @@ export default function Skills() {
     tiles: activeTiles.filter(tile => tile.row === row),
   }));
 
+  // User-initiated picks only; the auto-cycle sets state directly and is not tracked.
+  const trackDiscipline = (index: number, via: string) =>
+    track('skills_discipline', { discipline: skillCategories[index].id, via });
+
   const stepCategory = (dir: -1 | 1) => {
+    const next = (active + dir + COUNT) % COUNT;
+    trackDiscipline(next, 'arrow');
     setFocusedSkill(null);
-    setActive(prev => (prev + dir + COUNT) % COUNT);
+    setActive(next);
   };
 
-  const selectCategory = (index: number, skill: string | null = null) => {
+  const selectCategory = (index: number, skill: string | null = null, via?: string) => {
+    if (via && index !== active) trackDiscipline(index, via);
     setActive(index);
     setFocusedSkill(skill);
   };
@@ -368,13 +376,13 @@ export default function Skills() {
     if (step) {
       event.preventDefault();
       const next = (index + step + COUNT) % COUNT;
-      selectCategory(next);
+      selectCategory(next, null, 'keyboard');
       const selector = event.currentTarget.getAttribute('role') === 'tab' ? '[role="tab"]' : '[role="radio"]';
       const siblings = event.currentTarget.parentElement?.querySelectorAll<HTMLElement | SVGElement>(selector);
       siblings?.[next]?.focus();
     } else if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      selectCategory(index);
+      selectCategory(index, null, 'keyboard');
     }
   };
 
@@ -413,7 +421,7 @@ export default function Skills() {
                   aria-selected={isSelected}
                   tabIndex={isSelected ? 0 : -1}
                   onKeyDown={event => onRingKeyDown(event, i)}
-                  onClick={() => selectCategory(i)}
+                  onClick={() => selectCategory(i, null, 'tab')}
                   style={
                     isSelected
                       ? {
@@ -513,7 +521,7 @@ export default function Skills() {
                       top: `${topPct}%`,
                       '--tile-color': tileCat.color,
                     } as React.CSSProperties}
-                    onClick={() => selectCategory(tile.catIndex, tile.skill)}
+                    onClick={() => selectCategory(tile.catIndex, tile.skill, 'tile')}
                     onPointerEnter={() => {
                       if (isCatActive) hoverSkill(tile.skill);
                     }}
@@ -642,7 +650,7 @@ export default function Skills() {
                       className={`${styles.ringSegment} ${
                         isSelected ? styles.ringSegmentActive : ''
                       }`}
-                      onClick={() => selectCategory(i)}
+                      onClick={() => selectCategory(i, null, 'ring')}
                       onKeyDown={e => onRingKeyDown(e, i)}
                     >
                       <path

@@ -75,6 +75,7 @@ function ProjectCard({ project, index, wide, focus }: { project: Project; index:
 
   return (
     <motion.article
+      data-track-project={project.title}
       initial={{ opacity: 0, y: 48, scale: 0.97, filter: 'blur(8px)' }}
       whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
       viewport={{ once: true, margin: '-60px' }}
